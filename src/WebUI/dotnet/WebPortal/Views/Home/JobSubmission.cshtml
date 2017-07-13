@@ -244,7 +244,7 @@
          case "universe":
              settings.job_name = "Open AI Universe";
              settings.image = "mlcloudreg.westus.cloudapp.azure.com:5000/onenet04/aiuniverse:latest";
-             settings.cmd = "python /usr/local/universe/test.py";
+             settings.cmd = "export HOME=/job && python /usr/local/universe/test.py";
              settings.jobtrainingtype = "UniverseJob";
      }
      

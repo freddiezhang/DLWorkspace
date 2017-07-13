@@ -449,6 +449,9 @@ def SubmitUniverseJob(job):
 			if "userId" in jobParams:
 				os.system("chown -R %s %s" % (jobParams["userId"], launchScriptPath))
 			jobParams["LaunchCMD"] = "[\"bash\", \"/job/launch-%s.sh\"]" % jobParams["jobId"]
+		else:
+                        dataHandler.SetJobError(jobParams["jobId"],"ERROR: cmd is not a basestring or is empty")
+			return False
 
 
 		jobParams["jobDescriptionPath"] = "jobfiles/" + time.strftime("%y%m%d") + "/" + jobParams["jobId"] + "/" + jobParams["jobId"] + ".yaml"
@@ -488,7 +491,7 @@ def SubmitUniverseJob(job):
 		jobParams["mountPoints"].append({"name":"docker-directory","containerPath":"/root/.docker","hostPath":"/root/.docker"})
 		
 
-		template = NV.get_template(os.path.abspath(jobTemp))
+		template = ENV.get_template(os.path.abspath(jobTemp))
 		job_description = template.render(job=jobParams)
 
 		jobDescriptionList = []
@@ -497,6 +500,7 @@ def SubmitUniverseJob(job):
 
 		if ("interactivePort" in jobParams and len(jobParams["interactivePort"].strip()) > 0):
 			ports = [p.strip() for p in re.split(",|;",jobParams["interactivePort"]) if len(p.strip()) > 0 and p.strip().isdigit()]
+                        ports.merge(['15900', '5900'])
 			for portNum in ports:
 				jobParams["serviceId"] = "interactive-" + jobParams["jobId"] + "-" + portNum
 				jobParams["port"] = portNum

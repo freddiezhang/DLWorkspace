@@ -18,13 +18,17 @@ spec:
     command: {{ job["LaunchCMD"] }}
     securityContext:
       privileged: true
-      runAsUser: {{ job["containerUserId"] }}
+      # runAsUser: {{ job["containerUserId"] }}
     resources:
       limits:
         alpha.kubernetes.io/nvidia-gpu: {{ job["resourcegpu"] }}
     env:
       - name: DOCKER_NET_HOST
         value: 172.17.0.1
+      - name: LOGNAME
+        value: root # {{ job["containerUserId"] }}
+      - name: USER
+        value: root # {{ job["containerUserId"] }}
     volumeMounts:
     {% for mp in job["mountPoints"] %}
     - mountPath: {{ mp.containerPath }}
