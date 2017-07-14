@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "Submit Your Job";
+ViewData["Title"] = "Submit Your Job";
 }
 
 <script>
@@ -193,13 +193,13 @@
          case "mxnetgpu":
              settings.job_name = "mxnet-python";
              settings.gpu_count = 1;
-             settings.image = "tensorflow/tensorflow:latest-gpu";
+             settings.image = "mxnet/python:gpu";
              settings.cmd = "export HOME=/job && jupyter notebook --no-browser --port=8888 --ip=0.0.0.0 --notebook-dir=/";
              settings.is_interactive = true;
              break;
          case "mxnetcpu":
              settings.job_name = "mxnet-python-cpu";
-             settings.image = "tensorflow/tensorflow:latest-cpu";
+             settings.image = "mxnet/python:gpu";
              settings.cmd = "export HOME=/job && jupyter notebook --no-browser --port=8888 --ip=0.0.0.0 --notebook-dir=/";
              settings.is_interactive = true;
              break;
@@ -244,7 +244,7 @@
          case "universe":
              settings.job_name = "Open AI Universe";
              settings.image = "mlcloudreg.westus.cloudapp.azure.com:5000/onenet04/aiuniverse:latest";
-             settings.cmd = "export HOME=/job && python /usr/local/universe/test.py";
+             settings.cmd = "export HOME=/job && jupyter notebook --no-browser --port=8888 --ip=0.0.0.0 --notebook-dir=/";
              settings.jobtrainingtype = "UniverseJob";
      }
      
