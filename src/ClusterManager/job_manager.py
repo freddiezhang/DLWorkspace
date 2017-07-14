@@ -496,7 +496,6 @@ def SubmitUniverseJob(job):
 
 		if ("interactivePort" in jobParams and len(jobParams["interactivePort"].strip()) > 0):
 			ports = [p.strip() for p in re.split(",|;",jobParams["interactivePort"]) if len(p.strip()) > 0 and p.strip().isdigit()]
-                        ports.merge(['15900', '5900'])
 			for portNum in ports:
 				jobParams["serviceId"] = "interactive-" + jobParams["jobId"] + "-" + portNum
 				jobParams["port"] = portNum
