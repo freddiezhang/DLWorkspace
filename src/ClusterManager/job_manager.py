@@ -60,7 +60,7 @@ def cmd_exec(cmdStr):
 
 def SubmitJob(job):
 	jobParams = json.loads(base64.b64decode(job["jobParams"]))
-        job_training_type = jobParams["jobtrainingtype"]
+	job_training_type = jobParams["jobtrainingtype"]
 	if job_training_type == "RegularJob":
 		SubmitRegularJob(job)
 	elif job_training_type == "PSDistJob":
@@ -446,7 +446,7 @@ def SubmitUniverseJob(job):
 				os.system("chown -R %s %s" % (jobParams["userId"], launchScriptPath))
 			jobParams["LaunchCMD"] = "[\"bash\", \"/job/launch-%s.sh\"]" % jobParams["jobId"]
 		else:
-                        dataHandler.SetJobError(jobParams["jobId"],"ERROR: cmd is not a basestring or is empty")
+			dataHandler.SetJobError(jobParams["jobId"],"ERROR: cmd is not a basestring or is empty")
 			return False
 
 
@@ -780,7 +780,7 @@ def launch_ps_dist_job(jobParams):
 	workerPodInfo = k8sUtils.GetPod("distRole=worker,run=" + jobId)
 	psPodInfo = k8sUtils.GetPod("distRole=ps,run=" + jobId)
 	if "items" in workerPodInfo and len(workerPodInfo["items"]) == int(jobParams["numpsworker"]) and "items" in psPodInfo and len(psPodInfo["items"]) == int(jobParams["numps"]):
-		podStatus = [k8sUtils.check_pod_status(pod) for pod in  workerPodInfo["items"] + psPodInfo["items"] ]
+		podStatus = [k8sUtils.check_pod_status(pod) for pod in	workerPodInfo["items"] + psPodInfo["items"] ]
 		if all([status == "Running" for status in podStatus]):
 			ps_pod_names = [pod["metadata"]["name"] for pod in psPodInfo["items"]]
 			worker_pod_names = [pod["metadata"]["name"] for pod in workerPodInfo["items"]]
