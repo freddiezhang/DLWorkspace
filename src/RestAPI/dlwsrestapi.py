@@ -149,7 +149,7 @@ class ListJobs(Resource):
 
 			job["jobParams"] = json.loads(base64.b64decode(job["jobParams"]))
 
-			if "endpoints" in job and job["endpoints"] is not None	and (job["endpoints"].strip()) > 0:
+			if "endpoints" in job and job["endpoints"] is not None  and (job["endpoints"].strip()) > 0:
 				job["endpoints"] = json.loads(base64.b64decode(job["endpoints"]))
 
 			if "jobStatusDetail" in job and job["jobStatusDetail"] is not None  and (job["jobStatusDetail"].strip()) > 0:

@@ -167,7 +167,7 @@ class DataHandler:
 
 	def KillJob(self,jobId):
 		try:
-			sql = """update [%s] set jobStatus = 'killing' where cast([jobId] as nvarchar(max)) = N'%s' """ % (self.jobtablename,jobId)
+			sql = """update [%s] set jobStatus = 'killing' where cast([jobId] as nvarchar(max)) = N'%s' """ % (self.jobtablename,jobId)
 			cursor = self.conn.cursor()
 			cursor.execute(sql)
 			self.conn.commit()

@@ -1,0 +1,20 @@
+database :
+  hostname : {{cnf["sqlserver-hostname"]}}
+  username : {{cnf["sqlserver-username"]}}
+  password : {{cnf["sqlserver-password"]}}
+  database : {{cnf["sqlserver-database"]}}
+mysql :
+  hostname : {{cnf["mysql-hostname"]}}
+  username : {{cnf["mysql-username"]}}
+  password : {{cnf["mysql-password"]}}
+  database : {{cnf["mysql-database"]}}
+kubelet-path : /usr/local/bin/kubectl
+storage-mount-path : {{cnf["storage-mount-path"]}}
+root-path : /DLWorkspace/src/
+nvidiaDriverPath : {{cnf["nvidia-driver-path"]}}
+clusterId : {{cnf["clusterId"]}}
+domain : {{cnf["network"]["domain"]}}
+apiserver: {{cnf["api_servers"]}}
+certificate-authority: /etc/kubernetes/ssl/ca.pem
+client-certificate: /etc/kubernetes/ssl/apiserver.pem
+client-key: /etc/kubernetes/ssl/apiserver-key.pem
