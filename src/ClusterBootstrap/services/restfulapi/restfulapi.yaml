@@ -1,0 +1,31 @@
+kind: DaemonSet
+apiVersion: extensions/v1beta1
+metadata:
+  name: restfulapi
+  namespace: default
+spec:
+  template:
+    metadata:
+      name: restfulapi
+      labels:
+        restfulapi-node: pod
+    spec:
+      dnsPolicy: Default
+      nodeSelector:
+        restfulapi: active
+      containers:
+      - name: restfulapi
+        image: {{cnf["worker-dockerregistry"]}}{{cnf["dockerprefix"]}}restfulapi:{{cnf["dockertag"]}}
+        imagePullPolicy: Always
+        ports:
+          - name: http
+            containerPort: 80
+            hostPort: {{cnf["restfulapiport"]}}
+        imagePullPolicy: Always
+        volumeMounts:
+        - mountPath: /RestfulAPI
+          name: apiconfig
+      volumes:
+      - name: apiconfig
+        hostPath:
+          path: /etc/RestfulAPI

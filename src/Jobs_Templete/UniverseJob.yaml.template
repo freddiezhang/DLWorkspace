@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ job["jobId"] }}
+  labels: 
+     run: {{ job["jobId"] }}
+     jobName: {{ job["jobNameLabel"] }}
+     userName: {{ job["userNameLabel"] }}
+spec:
+  {% if job["resourcegpu"]|int < 8  %}
+  nodeSelector:
+    FragmentGPUJob: active
+  {% endif %}
+  dnsPolicy: Default
+  containers:
+  - name: {{ job["jobId"] }}
+    image: {{ job["image"] }}
+    command: {{ job["LaunchCMD"] }}
+    securityContext:
+      privileged: true
+      # runAsUser: {{ job["containerUserId"] }}
+    resources:
+      limits:
+        alpha.kubernetes.io/nvidia-gpu: {{ job["resourcegpu"] }}
+    env:
+      - name: DOCKER_NET_HOST
+        value: 172.17.0.1
+      - name: LOGNAME
+        value: root # {{ job["containerUserId"] }}
+      - name: USER
+        value: root # {{ job["containerUserId"] }}
+    volumeMounts:
+    {% for mp in job["mountPoints"] %}
+    - mountPath: {{ mp.containerPath }}
+      name: {{ mp.name }}
+    {% endfor %}
+    ports:
+      - name: http
+        containerPort: 80
+        hostPort: 80
+      - name: rewards
+        containerPort: 15900
+        hostPort: 15900
+      - name: vnc
+        containerPort: 5900
+        hostPort: 5900
+<<<<<<< HEAD
+    env:
+    - name: SECRET_TOKEN
+      value: {{ job["secretToken"] }}
+=======
+>>>>>>> 36b064112b42301000ecccb93f83d031842fb702
+
+
+  restartPolicy: Never
+  volumes:
+  {% for mp in job["mountPoints"] %}
+  - name: {{ mp.name }}
+    hostPath:
+      path: {{ mp.hostPath }}
+  {% endfor %}

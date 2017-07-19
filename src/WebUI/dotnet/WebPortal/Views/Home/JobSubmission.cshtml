@@ -1,0 +1,417 @@
+﻿@{
+    ViewData["Title"] = "Submit Your Job";
+}
+
+<script>
+  $(document).ready(function () {
+        $('#submit_job').on('submit', function (e) { //use on if jQuery 1.7+
+            e.preventDefault();  //prevent form from submitting
+            var params = "";
+
+            var jobname = $("#jobname").val().trim();
+            var workpath = encodeURIComponent($("#workpath").val().trim());
+            var datapath = encodeURIComponent($("#datapath").val().trim());
+            var jobpath = encodeURIComponent($("#jobpath").val().trim());
+            var image = encodeURIComponent($("#image").val().trim());
+            var cmd = encodeURIComponent($("#cmd").val().trim());
+            var logdir = encodeURIComponent($("#logdir").val().trim());
+            var interactiveport = encodeURIComponent($("#interactivePort").val().trim());
+
+
+            var numGPUsInt = parseInt($('#resourcegpu').val());
+            var numGPUStr = $('#resourcegpu').val();
+
+
+            //var jobtrainingtype = encodeURIComponent($("#jobtrainingtype").val().trim());
+
+
+            var jobtrainingtype = document.querySelector('input[name = jobtrainingtype]:checked').value;
+            jobtrainingtype = encodeURIComponent(jobtrainingtype.trim());
+
+            var numps = parseInt($('#numps').val());
+            var numpsworker = parseInt($('#numpsworker').val());
+            var nummpiworker = parseInt($('#nummpiworker').val());
+
+
+            if (numGPUsInt < 0 || numGPUsInt > 8) {
+                alert("Invalid GPU number:" + numGPUStr + ". GPU number has to be 0 - 8 in regular job");
+                return;
+            }
+
+            if (jobname == "") {
+                alert("Job Name cannot be empty!");
+                return;
+            }
+            if (workpath == "") {
+                alert("Work Path cannot be empty!");
+                return;
+            }
+            if (datapath == "") {
+                alert("Data Path cannot be empty!");
+                return;
+            }
+
+            if (image == "") {
+                alert("Docker Image cannot be empty!");
+                return;
+            }
+
+            if (cmd == "") {
+                alert("Default CMD in docker image:" + image + ". will be executed");
+            }
+
+            params = params + "resourcegpu=" + numGPUStr + "&";
+            params = params + "jobName=" + jobname + "&";
+            params = params + "workPath=" + workpath + "&";
+            params = params + "dataPath=" + datapath + "&";
+
+            var jobpath = $('#jobpath').val();
+            if (jobpath != "") {
+                params = params + "jobPath=" + jobpath + "&";
+            }
+
+            params = params + "image=" + image + "&";
+            params = params + "cmd=" + cmd + "&";
+
+            var logdir = $('#logdir').val();
+            if (logdir != "") {
+                params = params + "logDir=" + logdir + "&";
+            }
+
+            if (interactiveport != "") {
+                params = params + "interactivePort=" + interactiveport + "&";
+            }
+
+            params = params + "jobType=training&";
+            params = params + "jobtrainingtype=" + jobtrainingtype+"&";
+
+            if (jobtrainingtype == "PSDistJob")
+            {
+                params = params + "numps=" + numps + "&";
+                params = params + "numpsworker=" + numpsworker+"&";
+            }
+
+            if (jobtrainingtype == "MPIDistJob") {
+                params = params + "nummpiworker=" + nummpiworker + "&";
+            }
+
+
+
+            var runningasroot = document.getElementById("runningasroot").checked ? "1" : "0";
+            params = params + "runningasroot=" + runningasroot + "&";
+
+            var url = "/api/dlws/SubmitJob?" + params;
+
+            console.log(url);
+            $("#submit").attr("disabled", true);
+
+            $.ajax({
+                url: url,
+                dataType: 'json',
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert("RestfulAPI error!");
+                    $("#submit").attr("disabled", false);
+                },
+                timeout: 10000 //10 second timeout
+            }).done(
+         function (payload) {
+                    console.log(payload);
+                    if (payload.jobId) {
+                 alert("Job Submitted! \n Job ID:" + payload.jobId)
+                 location.href = "/Home/ViewJobs";
+                    } else if (payload.error) {
+                 alert("Error: " + payload.error, "Alert");
+                 $("#submit").attr("disabled", false);
+                    } else {
+                 alert("Unexpected error: " + payload, "Alert");
+                 $("#submit").attr("disabled", false);
+                    }
+
+         });
+
+        });
+    });
+</script>
+
+<script type="text/javascript">
+    function ShowHideDiv(chkbox, divId) {
+        var elem = document.getElementById(divId);
+        elem.style.display = chkbox.checked ? "block" : "none";
+    }
+    function HidePSDistJob() {
+        var elem2 = document.getElementById("PSDistJob");
+        elem2.style.display = "none";
+    }
+    function ShowPSDistJob() {
+        var elem2 = document.getElementById("PSDistJob");
+        elem2.style.display = "block";
+    }
+ 
+    function UseTemplate(id) {
+        var settings = {
+            job_name: undefined,
+            gpu_count: 0,
+            work_path: "@ViewData["Username"]",
+            data_path: "imagenet",
+            job_path: "",
+            image: undefined,
+            cmd: undefined,
+            is_interactive: false,
+            do_log: false,
+            port: "8888",
+            log_path: "",
+            run_as_root: false,
+            jobtrainingtype: "RegularJob"
+        };
+        switch(id) {
+            case "tensorflow":
+                settings.job_name = "tensorflow-ipython";
+                settings.gpu_count = 1;
+                settings.image = "tensorflow/tensorflow:latest-gpu";
+                settings.cmd = "export HOME=/job && jupyter notebook --no-browser --port=8888 --ip=0.0.0.0 --notebook-dir=/";
+                settings.is_interactive = true;
+                break;
+            case "tensorflowcpu":
+                settings.job_name = "tensorflow-ipython-cpu";
+                settings.image = "tensorflow/tensorflow:latest";
+                settings.cmd = "export HOME=/job && jupyter notebook --no-browser --port=8888 --ip=0.0.0.0 --notebook-dir=/";
+                settings.is_interactive = true;
+                break;
+            case "tensorflowssh":
+                settings.job_name = "tensorflow-ssh";
+                settings.image = "tensorflow/tensorflow:latest-gpu";
+                settings.cmd = "apt-get update && apt-get install -y openssh-server sudo && addgroup --force-badname --gid  @ViewData["gid"] domainusers && adduser --force-badname --home /home/@ViewData["Username"] --shell /bin/bash --uid @ViewData["uid"]  -gecos '' @ViewData["Username"] --disabled-password --gid @ViewData["gid"] && adduser @ViewData["Username"] sudo && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && mkdir -p /root/.ssh && cat /work/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys && mkdir -p /home/@ViewData["Username"]/.ssh && cat /work/.ssh/id_rsa.pub >> /home/@ViewData["Username"]/.ssh/authorized_keys && service ssh restart && sleep infinity";
+                settings.is_interactive = true;
+                settings.port = "22";
+                settings.run_as_root = true;
+                break;
+            case "mxnetgpu":
+                settings.job_name = "mxnet-python";
+                settings.gpu_count = 1;
+                settings.image = "mxnet/python:gpu";
+                settings.cmd = "export HOME=/job && pip install jupyter && jupyter notebook --no-browser --port=8888 --ip=0.0.0.0 --notebook-dir=/";
+                settings.is_interactive = true;
+                break;
+            case "mxnetcpu":
+                settings.job_name = "mxnet-python-cpu";
+                settings.image = "mxnet/python:gpu";
+                settings.cmd = "export HOME=/job && pip install jupyter && jupyter notebook --no-browser --port=8888 --ip=0.0.0.0 --notebook-dir=/";
+                settings.is_interactive = true;
+                break;
+            case "caffe":
+                settings.job_name = "caffe-ipython";
+                settings.image = "bvlc/caffe:cpu";
+                settings.cmd = "apt-get update && apt-get install -y python-pip sudo && addgroup --force-badname --gid  @ViewData["gid"] domainusers && adduser --force-badname --home /home/@ViewData["Username"] --shell /bin/bash --uid @ViewData["uid"]  -gecos '' @ViewData["Username"] --disabled-password --gid @ViewData["gid"] && pip install jupyter && cd /home/@ViewData["Username"] && sudo -H -u @ViewData["UserName"] jupyter notebook --no-browser --port=8888 --ip=0.0.0.0 --notebook-dir=/";
+                settings.is_interactive = true;
+                settings.run_as_root = true;
+                break;
+            case "caffessh":
+                settings.job_name = "caffe-ssh";
+                settings.image = "bvlc/caffe:cpu";
+                settings.cmd = "apt-get update && apt-get install -y openssh-server sudo && addgroup --force-badname --gid  @ViewData["gid"] domainusers && adduser --force-badname --home /home/@ViewData["Username"] --shell /bin/bash --uid @ViewData["uid"]  -gecos '' @ViewData["Username"] --disabled-password --gid @ViewData["gid"] && adduser @ViewData["Username"] sudo && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && mkdir -p /root/.ssh && cat /work/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys && mkdir -p /home/@ViewData["Username"]/.ssh && cat /work/.ssh/id_rsa.pub >> /home/@ViewData["Username"]/.ssh/authorized_keys && cp /work/.ssh/id_rsa* /home/@ViewData["Username"]/.ssh/ && chown -R @ViewData["Username"] /home/@ViewData["Username"]/.ssh/ && service ssh restart && env | while read line; do if [[ $line != HOME=* ]] && [[ $line != INTERACTIVE* ]] ; then echo \"export $line\" >> /home/@ViewData["Username"]/.bashrc; fi; done &&  sleep infinity";
+                settings.is_interactive = true;
+                settings.port = "22";
+                settings.run_as_root = true;
+                break;
+            case "caffesample":
+                settings.job_name = "caffe training example - resnet18";
+                settings.gpu_count = 1;
+                settings.work_path = "samples";
+                settings.image = "bvlc/caffe:gpu";
+                settings.cmd = "caffe train -solver /work/caffe/solver_resnet18.prototxt";
+                settings.port = "";
+                break;
+            case "tensorflowsample":
+                settings.job_name = "Tensorflow training example - inception";
+                settings.gpu_count = 1;
+                settings.work_path = "samples";
+                settings.image = "tensorflow/tensorflow:0.12.1-gpu";
+                settings.cmd = "/work/tensorflow/models/inception/bazel-bin/inception/imagenet_train --num_gpus=1 --batch_size=32 --train_dir=/job/model --data_dir=/data/tensor";
+                settings.port = "";
+                break;
+            case "cntkipython":
+                settings.job_name = "CNTK-ipython";
+                settings.image = "microsoft/cntk";
+                settings.cmd = "bash -c 'source \"/cntk/activate-cntk\" ; jupyter notebook --no-browser --port=8888 --ip=0.0.0.0 --notebook-dir=/ --allow-root'";
+                settings.is_interactive = true;
+                settings.run_as_root = true;
+                break;
+            case "universe":
+                settings.job_name = "Open AI Universe";
+                settings.image = "mlcloudreg.westus.cloudapp.azure.com:5000/onenet04/aiuniverse:latest";
+                settings.cmd = "export HOME=/job && jupyter notebook --no-browser --port=8888 --ip=0.0.0.0 --notebook-dir=/ --allow-root";
+                settings.is_interactive = true;
+                settings.jobtrainingtype = "UniverseJob";
+        }
+        
+        document.getElementById("jobname").value = settings.job_name || "";
+        document.getElementById("resourcegpu").value = settings.gpu_count;
+        document.getElementById("workpath").value = settings.work_path;
+        document.getElementById("datapath").value = settings.data_path;
+        document.getElementById("jobpath").value = settings.job_path;
+        document.getElementById("image").value = settings.image || "";
+        document.getElementById("cmd").value = settings.cmd || "";
+        document.getElementById("chkInteractiveJob").checked = settings.is_interactive;
+        document.getElementById("chkLogDir").checked = settings.do_log;
+        ShowHideDiv(document.getElementById("chkInteractiveJob"), 'interactiveportfield')
+        ShowHideDiv(document.getElementById("chkLogDir"), 'logdirfield')
+        document.getElementById("interactivePort").value = settings.port;
+        document.getElementById("logdir").value = settings.log_path;
+        document.getElementById("runningasroot").checked = settings.run_as_root;
+        document.querySelector("input[name = jobtrainingtype][value=" + settings.jobtrainingtype + "]").checked = true;
+    }
+</script>
+
+<div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <form method="POST" id="submit_job">
+
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="submitModalLabel">Submit Job</h4>
+            </div>
+
+            <div class="modal-body">
+
+
+
+                <div class="form-group">
+                    <label>
+                        Use Template
+                    </label>
+                    <br />
+                    <select onchange="UseTemplate(this.value)"> 
+                        <option value="none">None</option>
+                        <option value="tensorflow">Tensorflow-IPython-GPU</option>
+                        <option value="tensorflowcpu">Tensorflow-IPython-CPU</option>
+                        <option value="tensorflowssh">Tensorflow-SSH</option>
+                        <option value="mxnetgpu">MXNET-Python-GPU</option>
+                        <option value="mxnetcpu">MXNET-Python-CPU</option>
+                        <option value="caffe">Caffe-IPython</option>
+                        <option value="caffessh">Caffe-SSH</option>
+                        <option value="caffesample">Caffe training example</option>
+                        <option value="tensorflowsample">Tensorflow training example</option>
+                        <option value="cntkipython">CNTK-IPython</option>
+                        <option value="universe">OpenAI-Universe</option>
+                    </select>
+
+                </div>
+                <div class="form-group">
+                    <label>
+                        Job Type
+                    </label>
+                    <br/>
+                    <input type="radio" name="jobtrainingtype" id="jobtrainingtype" value="RegularJob" checked="checked"  onclick="HidePSDistJob()" /> Regular Training Job  <br />
+                    <input type="radio" name="jobtrainingtype" id="jobtrainingtype" value="PSDistJob" onclick="ShowPSDistJob()" /> Distributed Training Job  <br />
+                    <input type="radio" name="jobtrainingtype" id="jobtrainingtype" value="UniverseJob" onclick="HidePSDistJob()" /> OpenAI Universe Training Job  <br />
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        Job Name
+                    </label>
+                    <input type="text" class="form-control" id="jobname" />
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        Number of GPUs
+                    </label>
+                    <input type="number" class="form-control" id="resourcegpu" value="0" />
+                </div>
+
+
+                <div id="PSDistJob" hidden>
+                    <div class="form-group">
+                        <label>
+                            Number of Parameter Servers
+                        </label>
+                        <input type="number" class="form-control" id="numps" value="1" />
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            Number of Workers
+                        </label>
+                        <input type="number" class="form-control" id="numpsworker" value="1" />
+                    </div>
+                </div>
+
+
+                <div class="form-group">
+                    <label>
+                        Work Directory <font face="verdana" color="#A9A9A9">(relative to <a href="@ViewData["workPath"]">@ViewData["workPath"].ToString().Replace("file:", "").Replace("/", "\\") </a>).  </font> <br /> <font face="verdana" color="#A9A9A9"> This folder is mounted as <b>/work</b> inside container.</font>
+                    </label>
+                    <input type="text" class="form-control" id="workpath" />
+
+                    
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        Data Directory <font face="verdana" color="#A9A9A9">(relative to <a href="@ViewData["dataPath"]">@ViewData["dataPath"].ToString().Replace("file:", "").Replace("/", "\\") </a>). </font> <br /> <font face="verdana" color="#A9A9A9"> This folder is mounted as <b>/data</b> inside container.</font>
+                    </label>
+                    <input type="text" class="form-control" id="datapath" />
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        Job Directory (empty by default) <br /> <font face="verdana" color="#A9A9A9"> This folder is mounted as <b>/job</b> inside container.</font>
+                    </label>
+                    <input type="text" class="form-control" id="jobpath" />
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        Docker Image
+                    </label>
+                    <input list="imagelist" class="form-control" name="image" id="image" />
+                    <datalist  id="imagelist">
+                        <option value="mlcloudreg.westus.cloudapp.azure.com:5000/philly/agi-tf-0.12.1-src-ubuntu-16.04:latest" />
+                        <option value="mlcloudreg.westus.cloudapp.azure.com:5000/philly/agi-tf-1.1.0-src-ubuntu-16.04:latest" />
+                        <option value="mlcloudreg.westus.cloudapp.azure.com:5000/philly/agi-tf-pytorch-0.12.1-src-ubuntu-16.04:latest" />
+                    </datalist>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        Training Command
+                    </label>
+                    <textarea type="text" class="form-control" id="cmd" rows="5" > </textarea>
+                </div>
+
+                <div class="form-group">
+                    <input type="checkbox" id="chkLogDir" onclick="ShowHideDiv(this,'logdirfield')" />
+                    <label>
+                        Enable TensorBoard
+                    </label>
+                    <div id="logdirfield" hidden>
+                        <label>Model path:</label>
+                        <input type="text" class="form-control" id="logdir" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <input type="checkbox" id="chkInteractiveJob" onclick="ShowHideDiv(this, 'interactiveportfield')" />
+                    <label>
+                        Interactive Job? (e.g. ipython, ssh)
+                    </label>
+                    <div id="interactiveportfield" hidden>
+                        <label>Port used by interactive job:</label>
+                        <input type="text" class="form-control" id="interactivePort" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <input type="checkbox" id="runningasroot" />
+                    <label>
+                        Running as ROOT. (e.g. for ssh jobs)
+                    </label>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <input type="submit" value="Submit" name="submit" class="btn btn-success" id="submit" />
+            </div>
+        </form>
+    </div>
+</div>
