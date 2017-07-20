@@ -140,7 +140,7 @@ class SecureSubmitJob(Resource):
 		parser.add_argument('runningasroot')
 		parser.add_argument('containerUserId')
 		
-		
+
 		parser.add_argument('jobType')
 		
 
@@ -149,7 +149,7 @@ class SecureSubmitJob(Resource):
 		parser.add_argument('numpsworker')
 		parser.add_argument('nummpiworker')
 
-                parser.add_argument('familyToken')
+		parser.add_argument('familyToken')
 
 		args = parser.parse_args()
 
@@ -170,8 +170,8 @@ class SecureSubmitJob(Resource):
 			ret["error"] = "docker image cannot be empty"			
 		elif args["jobType"] is None or len(args["jobType"].strip()) == 0:
 			ret["error"] = "jobType cannot be empty"
-                elif args["jobType"] not in JobRestAPIUtils.GetExistingFamilies():
-                        ret["error"] = "jobs submitted securely must be added to an existing family"
+		elif args["familyToken"] not in JobRestAPIUtils.GetExistingFamilies():
+			ret["error"] = "jobs submitted securely must be added to an existing family"
 		else:
 			params["jobName"] = args["jobName"]
 			params["resourcegpu"] = args["resourcegpu"]
@@ -180,9 +180,9 @@ class SecureSubmitJob(Resource):
 			params["image"] = args["image"]
 			params["cmd"] = args["cmd"]
 			params["jobType"] = args["jobType"]
-                        params["familyToken"] = args["familyToken"]
-                        parent = next(record for record in JobRestAPIUtils.GetJobList() if record["familyToken"] == args["familyToken"] and record["isParent"] == 1)
-                        params["userName"] = parent["userName"]
+			params["familyToken"] = args["familyToken"]
+			parent = next(record for record in JobRestAPIUtils.GetJobList('all') if record["familyToken"] == args["familyToken"] and record["isParent"] == 1)
+			params["userName"] = parent["userName"]
 			params["jobtrainingtype"] = args["jobtrainingtype"]
 
 			if args["jobtrainingtype"] == "PSDistJob":
@@ -212,10 +212,9 @@ class SecureSubmitJob(Resource):
 			else:
 				params["containerUserId"] = params["userId"]
 
-                        params["isParent"] = 0
-                                
+			params["isParent"] = 0
+
 			output = JobRestAPIUtils.SubmitJob(json.dumps(params))
-			
 			if "jobId" in output:
 				ret["jobId"] = output["jobId"]
 			else:
@@ -223,7 +222,6 @@ class SecureSubmitJob(Resource):
 					ret["error"] = "Cannot create job!" + output["error"]
 				else:
 					ret["error"] = "Cannot create job!"
-
 		resp = jsonify(ret)
 		resp.headers["Access-Control-Allow-Origin"] = "*"
 		resp.headers["dataType"] = "json"		

@@ -225,10 +225,10 @@ def AddUser(username,userId):
 
 def GetExistingFamilies():
         dataHandler = DataHandler()
-        ret = map(lambda record: record["familyToken"], dataHandler.GetJobList())
+        jobs = dataHandler.GetJobList('all')
         dataHandler.Close()
-        return set(ret)
-        
+        return str(jobs)
+        return { job["familyToken"] for job in jobs }
 
 if __name__ == '__main__':
 	TEST_SUB_REG_JOB = False

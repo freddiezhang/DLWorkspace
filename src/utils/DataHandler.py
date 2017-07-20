@@ -107,14 +107,15 @@ class DataHandler:
 
 	def GetJobList(self, userName):
 		cursor = self.conn.cursor()
-		query = "SELECT [jobId],[jobName],[userName], [jobStatus], [jobStatusDetail], [jobType], [jobDescriptionPath], [jobDescription], [jobTime], [endpoints], [jobParams],[errorMsg] ,[jobMeta] FROM [%s]" % self.jobtablename
+		query = "SELECT [jobId],[familyToken],[isParent],[jobName],[userName], [jobStatus], [jobStatusDetail], [jobType], [jobDescriptionPath], [jobDescription], [jobTime], [endpoints], [jobParams],[errorMsg] ,[jobMeta] FROM [%s]" % self.jobtablename
 		if userName != "all":
 			query += " where cast([userName] as nvarchar(max)) = N'%s'" % userName
 
 		query += " order by [jobTime] Desc"
 		cursor.execute(query)
 		ret = []
-		for (jobId,jobName,userName, jobStatus,jobStatusDetail, jobType, jobDescriptionPath, jobDescription, jobTime, endpoints, jobParams,errorMsg, jobMeta) in cursor:
+                
+		for (jobId,familyToken,isParent,jobName,userName, jobStatus,jobStatusDetail, jobType, jobDescriptionPath, jobDescription, jobTime, endpoints, jobParams,errorMsg, jobMeta) in cursor:
 			record = {}
 			record["jobId"] = jobId
                         record["familyToken"] = familyToken
@@ -140,7 +141,7 @@ class DataHandler:
 	def GetJob(self, **kwargs):
 		valid_keys = ["jobId", "familyToken", "isParent", "jobName", "userName", "jobStatus", "jobStatusDetail", "jobType", "jobDescriptionPath", "jobDescription", "jobTime", "endpoints", "jobParams", "errorMsg", "jobMeta"]
 		if len(kwargs) != 1: return []
-		key, expected = kwargs.items()[0]
+		key, expected = kwargs.popitem()
 		if key not in valid_keys: return []
 		cursor = self.conn.cursor()
 		query = "SELECT [jobId],[familyToken],[isParent],[jobName],[userName], [jobStatus], [jobStatusDetail], [jobType], [jobDescriptionPath], [jobDescription], [jobTime], [endpoints], [jobParams],[errorMsg] ,[jobMeta]  FROM [%s] where cast([%s] as nvarchar(max)) = N'%s' " % (self.jobtablename,key,expected)

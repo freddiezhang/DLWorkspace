@@ -34,8 +34,8 @@ spec:
       name: {{ mp.name }}
     {% endfor %}
     env:
-    - name: SECRET_TOKEN
-      value: {{ job["secretToken"] }}
+    - name: FAMILY_TOKEN
+      value: {{ job["familyToken"] }}
 
   restartPolicy: Never
   volumes:
