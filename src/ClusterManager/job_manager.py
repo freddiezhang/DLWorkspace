@@ -869,7 +869,7 @@ def create_log( logdir = '/var/log/dlworkspace' ):
 		logging_config["handlers"]["file"]["filename"] = logdir+"/jobmanager.log"
 		logging.config.dictConfig(logging_config)
 
-
+import traceback
 def Run():
 
 	while True:
@@ -895,10 +895,10 @@ def Run():
 						UpdateJobStatus(job)
 					elif job["jobStatus"] == "unapproved" :
 						AutoApproveJob(job)
-				except Exception as e:
-					print e
-		except Exception as e:
-			print e
+				except Exception:
+					traceback.print_exc()
+		except Exception:
+			traceback.print_exc()
 
 		time.sleep(1)
 

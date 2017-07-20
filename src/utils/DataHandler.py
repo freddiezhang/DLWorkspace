@@ -16,7 +16,7 @@ class DataHandler:
 		#print "Try to connect with string: " + self.connstr
 		self.conn = pyodbc.connect(self.connstr)
 		#print "Connecting to server ..."
-		self.jobtablename = "jobs-%s" %  config["clusterId"]
+		self.jobtablename = "jobs-%s" %	 config["clusterId"]
 		self.usertablename = "users-%s" %  config["clusterId"]
 		self.clusterstatustablename = "clusterstatus-%s" %  config["clusterId"]
 
@@ -28,14 +28,15 @@ class DataHandler:
 		if not exists (select * from sysobjects where name='%s' and xtype='U')
 			CREATE TABLE [dbo].[%s]
 			(
-			    [id]        INT          IDENTITY (1, 1) NOT NULL,
+			    [id]	INT	     IDENTITY (1, 1) NOT NULL,
 			    [jobId] NTEXT   NOT NULL,
-                            [secretToken] NTEXT   NOT NULL,
-			    [jobName]         NTEXT NOT NULL,
-			    [userName]         NTEXT NOT NULL,
-				[jobStatus]         NTEXT NOT NULL DEFAULT 'unapproved',
+			    [familyToken] NTEXT	  NOT NULL,
+			    [isParent] INT NOT NULL,
+			    [jobName]	      NTEXT NOT NULL,
+			    [userName]	       NTEXT NOT NULL,
+				[jobStatus]	    NTEXT NOT NULL DEFAULT 'unapproved',
 				[jobStatusDetail] NTEXT NULL, 
-				[jobType]         NTEXT NOT NULL,
+				[jobType]	  NTEXT NOT NULL,
 			    [jobDescriptionPath]  NTEXT NULL,
 				[jobDescription]  NTEXT NULL,
 				[jobTime] DATETIME     DEFAULT (getdate()) NOT NULL,
@@ -44,7 +45,7 @@ class DataHandler:
 			    [jobParams] NTEXT NOT NULL, 
 			    [jobMeta] NTEXT NULL, 
 			    [jobLog] NTEXT NULL, 
-			    [retries]             int    NULL DEFAULT 0,
+			    [retries]		  int	 NULL DEFAULT 0,
 			    PRIMARY KEY CLUSTERED ([id] ASC)
 			)
 			""" % (self.jobtablename,self.jobtablename)
@@ -59,9 +60,9 @@ class DataHandler:
 		if not exists (select * from sysobjects where name='%s' and xtype='U')
 			CREATE TABLE [dbo].[%s]
 			(
-			    [id]        INT          IDENTITY (1, 1) NOT NULL,
-			    [status]         NTEXT NOT NULL,
-				[time] DATETIME     DEFAULT (getdate()) NOT NULL,
+			    [id]	INT	     IDENTITY (1, 1) NOT NULL,
+			    [status]	     NTEXT NOT NULL,
+				[time] DATETIME	    DEFAULT (getdate()) NOT NULL,
 			    PRIMARY KEY CLUSTERED ([id] ASC)
 			)
 			""" % (self.clusterstatustablename,self.clusterstatustablename)
@@ -77,10 +78,10 @@ class DataHandler:
 		if not exists (select * from sysobjects where name='%s' and xtype='U')
 			CREATE TABLE [dbo].[%s]
 			(
-			    [id]        INT          IDENTITY (1, 1) NOT NULL,
-			    [username]         NTEXT NOT NULL,
-			    [userId]         NTEXT NOT NULL,
-				[time] DATETIME     DEFAULT (getdate()) NOT NULL,
+			    [id]	INT	     IDENTITY (1, 1) NOT NULL,
+			    [username]	       NTEXT NOT NULL,
+			    [userId]	     NTEXT NOT NULL,
+				[time] DATETIME	    DEFAULT (getdate()) NOT NULL,
 			    PRIMARY KEY CLUSTERED ([id] ASC)
 			)
 			""" % (self.usertablename,self.usertablename)
@@ -93,11 +94,11 @@ class DataHandler:
 
 	def AddJob(self, jobParams):
 		try:
-			sql = """INSERT INTO [%s] (jobId, secretToken, jobName, userName, jobType, jobParams) VALUES (?,?,?,?,?,?)""" % self.jobtablename
+			sql = """INSERT INTO [%s] (jobId, familyToken, isParent, jobName, userName, jobType, jobParams) VALUES (?,?,?,?,?,?,?)""" % self.jobtablename
 			cursor = self.conn.cursor()
 			jobParam = base64.b64encode(json.dumps(jobParams))
-			cursor.execute(sql, jobParams["jobId"], jobParams["secretToken"], jobParams["jobName"], jobParams["userName"], jobParams["jobType"],jobParam)
-			self.conn.commit()
+			cursor.execute(sql, jobParams["jobId"], jobParams["familyToken"], jobParams["isParent"], jobParams["jobName"], jobParams["userName"], jobParams["jobType"],jobParam)
+			self.conn.commit() 
 			cursor.close()
 			return True
 		except:
@@ -116,6 +117,8 @@ class DataHandler:
 		for (jobId,jobName,userName, jobStatus,jobStatusDetail, jobType, jobDescriptionPath, jobDescription, jobTime, endpoints, jobParams,errorMsg, jobMeta) in cursor:
 			record = {}
 			record["jobId"] = jobId
+                        record["familyToken"] = familyToken
+                        record["isParent"] = isParent
 			record["jobName"] = jobName
 			record["userName"] = userName
 			record["jobStatus"] = jobStatus
@@ -135,18 +138,19 @@ class DataHandler:
 
 
 	def GetJob(self, **kwargs):
-		valid_keys = ["jobId", "secretToken", "jobName", "userName", "jobStatus", "jobStatusDetail", "jobType", "jobDescriptionPath", "jobDescription", "jobTime", "endpoints", "jobParams", "errorMsg", "jobMeta"]
+		valid_keys = ["jobId", "familyToken", "isParent", "jobName", "userName", "jobStatus", "jobStatusDetail", "jobType", "jobDescriptionPath", "jobDescription", "jobTime", "endpoints", "jobParams", "errorMsg", "jobMeta"]
 		if not kwargs: return []
 		key, expected = kwargs.items()[0]
 		if key not in valid_keys: return []
 		cursor = self.conn.cursor()
-		query = "SELECT [jobId],[secretToken],[jobName],[userName], [jobStatus], [jobStatusDetail], [jobType], [jobDescriptionPath], [jobDescription], [jobTime], [endpoints], [jobParams],[errorMsg] ,[jobMeta]  FROM [%s] where cast([%s] as nvarchar(max)) = N'%s' " % (self.jobtablename,key,expected)
+		query = "SELECT [jobId],[familyToken],[isParent],[jobName],[userName], [jobStatus], [jobStatusDetail], [jobType], [jobDescriptionPath], [jobDescription], [jobTime], [endpoints], [jobParams],[errorMsg] ,[jobMeta]  FROM [%s] where cast([%s] as nvarchar(max)) = N'%s' " % (self.jobtablename,key,expected)
 		cursor.execute(query)
 		ret = []
-		for (jobId,secretToken,jobName,userName, jobStatus,jobStatusDetail, jobType, jobDescriptionPath, jobDescription, jobTime, endpoints, jobParams,errorMsg, jobMeta) in cursor:
+		for (jobId,familyToken,isParent,jobName,userName, jobStatus,jobStatusDetail, jobType, jobDescriptionPath, jobDescription, jobTime, endpoints, jobParams,errorMsg, jobMeta) in cursor:
 			record = {}
 			record["jobId"] = jobId
-			record["secretToken"] = secretToken
+			record["familyToken"] = familyToken
+			record["isParent"] = isParent
 			record["jobName"] = jobName
 			record["userName"] = userName
 			record["jobStatus"] = jobStatus
@@ -191,12 +195,14 @@ class DataHandler:
 
 	def GetPendingJobs(self):
 		cursor = self.conn.cursor()
-		query = "SELECT [jobId],[jobName],[userName], [jobStatus], [jobType], [jobDescriptionPath], [jobDescription], [jobTime], [endpoints], [jobParams],[errorMsg] ,[jobMeta] FROM [%s] where cast([jobStatus] as nvarchar(max)) <> N'error' and cast([jobStatus] as nvarchar(max)) <> N'failed' and cast([jobStatus] as nvarchar(max)) <> N'finished' and cast([jobStatus] as nvarchar(max)) <> N'killed' order by [jobTime] DESC" % (self.jobtablename)
+		query = "SELECT [jobId],[familyToken],[isParent],[jobName],[userName], [jobStatus], [jobType], [jobDescriptionPath], [jobDescription], [jobTime], [endpoints], [jobParams],[errorMsg] ,[jobMeta] FROM [%s] where cast([jobStatus] as nvarchar(max)) <> N'error' and cast([jobStatus] as nvarchar(max)) <> N'failed' and cast([jobStatus] as nvarchar(max)) <> N'finished' and cast([jobStatus] as nvarchar(max)) <> N'killed' order by [jobTime] DESC" % (self.jobtablename)
 		cursor.execute(query)
 		ret = []
-		for (jobId,jobName,userName, jobStatus, jobType, jobDescriptionPath, jobDescription, jobTime, endpoints, jobParams,errorMsg, jobMeta) in cursor:
+		for (jobId,familyToken,isParent,jobName,userName, jobStatus, jobType, jobDescriptionPath, jobDescription, jobTime, endpoints, jobParams,errorMsg, jobMeta) in cursor:
 			record = {}
 			record["jobId"] = jobId
+                        record["familyToken"] = familyToken
+                        record["isParent"] = isParent
 			record["jobName"] = jobName
 			record["userName"] = userName
 			record["jobStatus"] = jobStatus

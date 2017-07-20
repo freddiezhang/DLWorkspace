@@ -35,7 +35,8 @@ def SubmitJob(jobParamsJsonStr):
 		jobParams["jobId"] = str(uuid.uuid4()) 
 	#jobParams["jobId"] = jobParams["jobId"].replace("_","-").replace(".","-")
 
-        jobParams["secretToken"] = str(uuid.uuid4())
+        jobParams["familyToken"] = str(uuid.uuid4())
+        jobParams["isParent"] = 1
 
 	userName = jobParams["userName"]
 	if "@" in userName:
@@ -158,8 +159,8 @@ def KillJob(jobId):
 	ret = False
 	jobs =	dataHandler.GetJob(jobId=jobId)
 	if len(jobs) == 1:
-		token = jobs[0]["secretToken"]
-		jobs = dataHandler.GetJob(secretToken=token)
+		token = jobs[0]["familyToken"]
+		jobs = dataHandler.GetJob(familyToken=token)
 		for job in jobs:
 			ret = dataHandler.KillJob(job["jobId"])
 	dataHandler.Close()
@@ -179,11 +180,7 @@ def ApproveJob(jobId):
 def GetJobDetail(jobId):
 	job = None
 	dataHandler = DataHandler()
-<<<<<<< HEAD
 	jobs =  dataHandler.GetJob(jobId=jobId)
-=======
-	jobs =  dataHandler.GetJob(jobId)
->>>>>>> 36b064112b42301000ecccb93f83d031842fb702
 	if len(jobs) == 1:
 		job = jobs[0]
 		job["log"] = ""
