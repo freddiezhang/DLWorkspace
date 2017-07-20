@@ -126,8 +126,110 @@ class SubmitJob(Resource):
 ##
 api.add_resource(SubmitJob, '/SubmitJob')
 
+class SecureSubmitJob(Resource):
+	def get(self):
+		parser.add_argument('jobName')
+		parser.add_argument('resourcegpu')
+		parser.add_argument('workPath')
+		parser.add_argument('dataPath')
+		parser.add_argument('jobPath')
+		parser.add_argument('image')
+		parser.add_argument('cmd')
+		parser.add_argument('logDir')
+		parser.add_argument('interactivePort')
+		parser.add_argument('runningasroot')
+		parser.add_argument('containerUserId')
+		
+		
+		parser.add_argument('jobType')
+		
 
+		parser.add_argument('jobtrainingtype')
+		parser.add_argument('numps')
+		parser.add_argument('numpsworker')
+		parser.add_argument('nummpiworker')
 
+                parser.add_argument('familyToken')
+
+		args = parser.parse_args()
+
+		params = {}
+		ret = {}
+
+		for key, value in args.iteritems():
+			if value is not None:
+				params[key] = value
+
+		if args["jobName"] is None or len(args["jobName"].strip()) == 0:
+			ret["error"] = "job name cannot be empty"
+		elif args["resourcegpu"] is None or len(args["resourcegpu"].strip()) == 0:
+			ret["error"] = "Number of GPU cannot be empty"		
+		elif args["dataPath"] is None or len(args["dataPath"].strip()) == 0:
+			ret["error"] = "datapath cannot be empty"			
+		elif args["image"] is None or len(args["image"].strip()) == 0:
+			ret["error"] = "docker image cannot be empty"			
+		elif args["jobType"] is None or len(args["jobType"].strip()) == 0:
+			ret["error"] = "jobType cannot be empty"
+                elif args["jobType"] not in JobRestAPIUtils.GetExistingFamilies():
+                        ret["error"] = "jobs submitted securely must be added to an existing family"
+		else:
+			params["jobName"] = args["jobName"]
+			params["resourcegpu"] = args["resourcegpu"]
+			params["workPath"] = args["workPath"]
+			params["dataPath"] = args["dataPath"]
+			params["image"] = args["image"]
+			params["cmd"] = args["cmd"]
+			params["jobType"] = args["jobType"]
+                        params["familyToken"] = args["familyToken"]
+                        parent = next(record for record in JobRestAPIUtils.GetJobList() if record["familyToken"] == args["familyToken"] and record["isParent"] == 1)
+                        params["userName"] = parent["userName"]
+			params["jobtrainingtype"] = args["jobtrainingtype"]
+
+			if args["jobtrainingtype"] == "PSDistJob":
+				params["numps"] = args["numps"]
+				params["numpsworker"] = args["numpsworker"]
+
+			if args["jobtrainingtype"] == "MPIDistJob":
+				params["nummpiworker"] = args["nummpiworker"]
+
+			if args["jobPath"] is not None and len(args["jobPath"].strip()) > 0:
+				params["jobPath"] = args["jobPath"]
+
+			if args["logDir"] is not None and len(args["logDir"].strip()) > 0:
+				params["logDir"] = args["logDir"]
+
+			if args["userId"] is not None and len(args["userId"].strip()) > 0:
+				params["userId"] = args["userId"]
+			else:
+				# !! note: if userId is not provided, the container will be running as root. There shouldn't be any security concern since all the resources in docker container should be user's own property. Also, we plan to allow user to choose "run as root".   
+				params["userId"] = "0"
+
+			if args["interactivePort"] is not None and len(args["interactivePort"].strip()) > 0:
+				params["interactivePort"] = args["interactivePort"]
+
+			if args["containerUserId"] is not None and len(args["containerUserId"].strip()) > 0:
+				params["containerUserId"] = args["containerUserId"]
+			else:
+				params["containerUserId"] = params["userId"]
+
+                        params["isParent"] = 0
+                                
+			output = JobRestAPIUtils.SubmitJob(json.dumps(params))
+			
+			if "jobId" in output:
+				ret["jobId"] = output["jobId"]
+			else:
+				if "error" in output:
+					ret["error"] = "Cannot create job!" + output["error"]
+				else:
+					ret["error"] = "Cannot create job!"
+
+		resp = jsonify(ret)
+		resp.headers["Access-Control-Allow-Origin"] = "*"
+		resp.headers["dataType"] = "json"		
+		return resp
+
+api.add_resource(SecureSubmitJob, '/SecureSubmitJob')
 
 # shows a list of all todos, and lets you POST to add new tasks
 class ListJobs(Resource):
@@ -171,6 +273,7 @@ class ListJobs(Resource):
 
 
 		ret = {}
+
 		ret["queuedJobs"] = queuedJobs
 		ret["runningJobs"] = runningJobs
 		ret["finishedJobs"] = finishedJobs

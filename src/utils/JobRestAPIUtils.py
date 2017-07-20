@@ -35,8 +35,10 @@ def SubmitJob(jobParamsJsonStr):
 		jobParams["jobId"] = str(uuid.uuid4()) 
 	#jobParams["jobId"] = jobParams["jobId"].replace("_","-").replace(".","-")
 
-        jobParams["familyToken"] = str(uuid.uuid4())
-        jobParams["isParent"] = 1
+        if "familyToken" not in jobParams or jobParams["familyToken"] == "":
+                jobParams["familyToken"] = str(uuid.uuid4())
+        if "isParent" not in jobParams or jobParams["isParent"] == "":
+                jobParams["isParent"] = 1
 
 	userName = jobParams["userName"]
 	if "@" in userName:
@@ -221,6 +223,12 @@ def AddUser(username,userId):
 	dataHandler.Close()
 	return ret
 
+def GetExistingFamilies():
+        dataHandler = DataHandler()
+        ret = map(lambda record: record["familyToken"], dataHandler.GetJobList())
+        dataHandler.Close()
+        return set(ret)
+        
 
 if __name__ == '__main__':
 	TEST_SUB_REG_JOB = False

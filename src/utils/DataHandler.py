@@ -139,7 +139,7 @@ class DataHandler:
 
 	def GetJob(self, **kwargs):
 		valid_keys = ["jobId", "familyToken", "isParent", "jobName", "userName", "jobStatus", "jobStatusDetail", "jobType", "jobDescriptionPath", "jobDescription", "jobTime", "endpoints", "jobParams", "errorMsg", "jobMeta"]
-		if not kwargs: return []
+		if len(kwargs) != 1: return []
 		key, expected = kwargs.items()[0]
 		if key not in valid_keys: return []
 		cursor = self.conn.cursor()
