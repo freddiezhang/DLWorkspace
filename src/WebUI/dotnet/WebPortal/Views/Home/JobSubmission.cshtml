@@ -3,7 +3,7 @@
 }
 
 <script>
-    $(document).ready(function () {
+  $(document).ready(function () {
         $('#submit_job').on('submit', function (e) { //use on if jQuery 1.7+
             e.preventDefault();  //prevent form from submitting
             var params = "";
@@ -25,14 +25,8 @@
             //var jobtrainingtype = encodeURIComponent($("#jobtrainingtype").val().trim());
 
 
-            var radios = document.getElementsByName('jobtrainingtype');
-
-            for (var i = 0, length = radios.length; i < length; i++) {
-                if (radios[i].checked) {
-                    var jobtrainingtype = encodeURIComponent(radios[i].value.trim());
-                    break;
-                }
-            }
+            var jobtrainingtype = document.querySelector('input[name = jobtrainingtype]:checked').value;
+            jobtrainingtype = encodeURIComponent(jobtrainingtype.trim());
 
             var numps = parseInt($('#numps').val());
             var numpsworker = parseInt($('#numpsworker').val());
@@ -120,20 +114,20 @@
                 },
                 timeout: 10000 //10 second timeout
             }).done(
-                function (payload) {
+         function (payload) {
                     console.log(payload);
                     if (payload.jobId) {
-                        alert("Job Submitted! \n Job ID:" + payload.jobId)
-                        location.href = "/Home/ViewJobs";
+                 alert("Job Submitted! \n Job ID:" + payload.jobId)
+                 location.href = "/Home/ViewJobs";
                     } else if (payload.error) {
-                        alert("Error: " + payload.error, "Alert");
-                        $("#submit").attr("disabled", false);
+                 alert("Error: " + payload.error, "Alert");
+                 $("#submit").attr("disabled", false);
                     } else {
-                        alert("Unexpected error: " + payload, "Alert");
-                        $("#submit").attr("disabled", false);
+                 alert("Unexpected error: " + payload, "Alert");
+                 $("#submit").attr("disabled", false);
                     }
 
-                });
+         });
 
         });
     });
@@ -144,18 +138,13 @@
         var elem = document.getElementById(divId);
         elem.style.display = chkbox.checked ? "block" : "none";
     }
-    function ShowRegularJob() {
-
+    function HidePSDistJob() {
         var elem2 = document.getElementById("PSDistJob");
         elem2.style.display = "none";
-
-
     }
     function ShowPSDistJob() {
-
         var elem2 = document.getElementById("PSDistJob");
         elem2.style.display = "block";
-
     }
  
     function UseTemplate(id) {
@@ -171,7 +160,8 @@
             do_log: false,
             port: "8888",
             log_path: "",
-            run_as_root: false
+            run_as_root: false,
+            jobtrainingtype: "RegularJob"
         };
         switch(id) {
             case "tensorflow":
@@ -198,14 +188,14 @@
             case "mxnetgpu":
                 settings.job_name = "mxnet-python";
                 settings.gpu_count = 1;
-                settings.image = "tensorflow/tensorflow:latest-gpu";
-                settings.cmd = "export HOME=/job && jupyter notebook --no-browser --port=8888 --ip=0.0.0.0 --notebook-dir=/";
+                settings.image = "mxnet/python:gpu";
+                settings.cmd = "export HOME=/job && pip install jupyter && jupyter notebook --no-browser --port=8888 --ip=0.0.0.0 --notebook-dir=/";
                 settings.is_interactive = true;
                 break;
             case "mxnetcpu":
                 settings.job_name = "mxnet-python-cpu";
-                settings.image = "tensorflow/tensorflow:latest-cpu";
-                settings.cmd = "export HOME=/job && jupyter notebook --no-browser --port=8888 --ip=0.0.0.0 --notebook-dir=/";
+                settings.image = "mxnet/python:gpu";
+                settings.cmd = "export HOME=/job && pip install jupyter && jupyter notebook --no-browser --port=8888 --ip=0.0.0.0 --notebook-dir=/";
                 settings.is_interactive = true;
                 break;
             case "caffe":
@@ -246,7 +236,13 @@
                 settings.is_interactive = true;
                 settings.run_as_root = true;
                 break;
-	}
+            case "universe":
+                settings.job_name = "Open AI Universe";
+                settings.image = "mlcloudreg.westus.cloudapp.azure.com:5000/onenet04/aiuniverse:latest";
+                settings.cmd = "export HOME=/job && jupyter notebook --no-browser --port=8888 --ip=0.0.0.0 --notebook-dir=/ --allow-root";
+                settings.is_interactive = true;
+                settings.jobtrainingtype = "UniverseJob";
+        }
         
         document.getElementById("jobname").value = settings.job_name || "";
         document.getElementById("resourcegpu").value = settings.gpu_count;
@@ -262,6 +258,7 @@
         document.getElementById("interactivePort").value = settings.port;
         document.getElementById("logdir").value = settings.log_path;
         document.getElementById("runningasroot").checked = settings.run_as_root;
+        document.querySelector("input[name = jobtrainingtype][value=" + settings.jobtrainingtype + "]").checked = true;
     }
 </script>
 
@@ -295,6 +292,7 @@
                         <option value="caffesample">Caffe training example</option>
                         <option value="tensorflowsample">Tensorflow training example</option>
                         <option value="cntkipython">CNTK-IPython</option>
+                        <option value="universe">OpenAI-Universe</option>
                     </select>
 
                 </div>
@@ -303,8 +301,9 @@
                         Job Type
                     </label>
                     <br/>
-                    <input type="radio" name="jobtrainingtype" id="jobtrainingtype" value="RegularJob" checked="checked"  onclick="ShowRegularJob()" /> Regular Training Job  <br />
+                    <input type="radio" name="jobtrainingtype" id="jobtrainingtype" value="RegularJob" checked="checked"  onclick="HidePSDistJob()" /> Regular Training Job  <br />
                     <input type="radio" name="jobtrainingtype" id="jobtrainingtype" value="PSDistJob" onclick="ShowPSDistJob()" /> Distributed Training Job  <br />
+                    <input type="radio" name="jobtrainingtype" id="jobtrainingtype" value="UniverseJob" onclick="HidePSDistJob()" /> OpenAI Universe Training Job  <br />
                 </div>
 
                 <div class="form-group">

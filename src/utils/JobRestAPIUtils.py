@@ -35,6 +35,11 @@ def SubmitJob(jobParamsJsonStr):
 		jobParams["jobId"] = str(uuid.uuid4()) 
 	#jobParams["jobId"] = jobParams["jobId"].replace("_","-").replace(".","-")
 
+        if "familyToken" not in jobParams or jobParams["familyToken"] == "":
+                jobParams["familyToken"] = str(uuid.uuid4())
+        if "isParent" not in jobParams or jobParams["isParent"] == "":
+                jobParams["isParent"] = 1
+
 	userName = jobParams["userName"]
 	if "@" in userName:
 		userName = userName.split("@")[0].strip()
@@ -142,21 +147,27 @@ def SubmitJob(jobParamsJsonStr):
 
 
 def GetJobList(userName):
-	dataHandler = DataHandler()
-	jobs =  dataHandler.GetJobList(userName)
-	for job in jobs:
-		job.pop('jobMeta', None)
-	dataHandler.Close()
-	return jobs
+	try:
+		dataHandler = DataHandler()
+		jobs =  dataHandler.GetJobList(userName)
+		for job in jobs:
+			job.pop('jobMeta', None)
+		dataHandler.Close()
+		return jobs
+	except:
+		return []
 
 
 
 def KillJob(jobId):
 	dataHandler = DataHandler()
 	ret = False
-	jobs =  dataHandler.GetJob(jobId)
+	jobs =	dataHandler.GetJob(jobId=jobId)
 	if len(jobs) == 1:
-		ret = dataHandler.KillJob(jobId)
+		token = jobs[0]["familyToken"]
+		jobs = dataHandler.GetJob(familyToken=token)
+		for job in jobs:
+			ret = dataHandler.KillJob(job["jobId"])
 	dataHandler.Close()
 	return ret
 
@@ -164,7 +175,7 @@ def KillJob(jobId):
 def ApproveJob(jobId):
 	dataHandler = DataHandler()
 	ret = False
-	jobs =  dataHandler.GetJob(jobId)
+	jobs =  dataHandler.GetJob(jobId=jobId)
 	if len(jobs) == 1:
 		ret = dataHandler.ApproveJob(jobId)
 	dataHandler.Close()
@@ -174,7 +185,7 @@ def ApproveJob(jobId):
 def GetJobDetail(jobId):
 	job = None
 	dataHandler = DataHandler()
-	jobs =  dataHandler.GetJob(jobId)
+	jobs =  dataHandler.GetJob(jobId=jobId)
 	if len(jobs) == 1:
 		job = jobs[0]
 		job["log"] = ""
@@ -215,6 +226,12 @@ def AddUser(username,userId):
 	dataHandler.Close()
 	return ret
 
+def GetExistingFamilies():
+        dataHandler = DataHandler()
+        jobs = dataHandler.GetJobList('all')
+        dataHandler.Close()
+        return str(jobs)
+        return { job["familyToken"] for job in jobs }
 
 if __name__ == '__main__':
 	TEST_SUB_REG_JOB = False

@@ -89,6 +89,22 @@ namespace WindowsAuth.Controllers
                         url += "containerUserId=0&";
                     }
                     break;
+		case "SecureSubmitJob":
+                    url = restapi + "/SecureSubmitJob?";
+                    foreach (var item in HttpContext.Request.Query)
+                    {
+                        //security check, user cannot append userName to the request url
+                        if (item.Key.ToLower() != "username")
+                        {
+                            url += System.Text.Encodings.Web.UrlEncoder.Default.Encode(item.Key) + "=" + System.Text.Encodings.Web.UrlEncoder.Default.Encode(item.Value) + "&";
+                        }
+                    }
+                    url += "userId=" + HttpContext.Session.GetString("uid") + "&";
+                    if (HttpContext.Request.Query.ContainsKey("runningasroot") && HttpContext.Request.Query["runningasroot"] == "1")
+                    {
+                        url += "containerUserId=0&";
+                    }		    
+		    break;
                 case "GetClusterStatus":
                     url = restapi + "/GetClusterStatus?";
                     break;

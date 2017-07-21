@@ -60,10 +60,13 @@ def cmd_exec(cmdStr):
 
 def SubmitJob(job):
 	jobParams = json.loads(base64.b64decode(job["jobParams"]))
-	if jobParams["jobtrainingtype"] == "RegularJob":
+	job_training_type = jobParams["jobtrainingtype"]
+	if job_training_type == "RegularJob":
 		SubmitRegularJob(job)
-	elif jobParams["jobtrainingtype"] == "PSDistJob":
+	elif job_training_type == "PSDistJob":
 		SubmitPSDistJob(job)
+	elif job_training_type == "UniverseJob":
+		SubmitUniverseJob(job)
 
 def SubmitRegularJob(job):
 	ret = {}
@@ -391,7 +394,165 @@ chmod +x /opt/run_dist_job.sh
 
 	return ret
 
+def SubmitUniverseJob(job):
+	ret = {}
+	dataHandler = DataHandler()
 
+	try:
+		jobParams = json.loads(base64.b64decode(job["jobParams"]))
+
+		jobParams["pvc_job"] = "jobs-" + jobParams["jobId"]
+		jobParams["pvc_work"] = "work-" + jobParams["jobId"]
+		jobParams["pvc_data"] = "storage-" + jobParams["jobId"]
+
+
+		if "jobPath" not in jobParams or len(jobParams["jobPath"].strip()) == 0: 
+			dataHandler.SetJobError(jobParams["jobId"],"ERROR: job-path does not exist")
+			return False
+
+		if "workPath" not in jobParams or len(jobParams["workPath"].strip()) == 0: 
+			dataHandler.SetJobError(jobParams["jobId"],"ERROR: work-path does not exist")
+			return False
+
+		if "dataPath" not in jobParams or len(jobParams["dataPath"].strip()) == 0: 
+			dataHandler.SetJobError(jobParams["jobId"],"ERROR: data-path does not exist")
+			return False
+
+
+		jobPath,workPath,dataPath = GetStoragePath(jobParams["jobPath"],jobParams["workPath"],jobParams["dataPath"])
+
+
+		localJobPath = os.path.join(config["storage-mount-path"],jobPath)
+
+		if not os.path.exists(localJobPath):
+			if "userId" in jobParams:
+				mkdirsAsUser(localJobPath,jobParams["userId"])
+				mkdirsAsUser(os.path.join(localJobPath,"models"),jobParams["userId"])
+			else:
+				mkdirsAsUser(localJobPath,"0")
+				mkdirsAsUser(os.path.join(localJobPath,"models"),"0")
+
+		jobParams["LaunchCMD"] = ""
+		if "cmd" not in jobParams:
+			jobParams["cmd"] = ""
+			
+		if isinstance(jobParams["cmd"], basestring) and not jobParams["cmd"] == "":
+			launchScriptPath = os.path.join(localJobPath,"launch-%s.sh" % jobParams["jobId"])
+			with open(launchScriptPath, 'w') as f:
+				f.write("#!/bin/bash -x\n")
+				f.write(jobParams["cmd"] + "\n")
+			f.close()	
+			if "userId" in jobParams:
+				os.system("chown -R %s %s" % (jobParams["userId"], launchScriptPath))
+			jobParams["LaunchCMD"] = "[\"bash\", \"/job/launch-%s.sh\"]" % jobParams["jobId"]
+		else:
+			dataHandler.SetJobError(jobParams["jobId"],"ERROR: cmd is not a basestring or is empty")
+			return False
+
+
+		jobParams["jobDescriptionPath"] = "jobfiles/" + time.strftime("%y%m%d") + "/" + jobParams["jobId"] + "/" + jobParams["jobId"] + ".yaml"
+
+		jobParams["jobNameLabel"] = ''.join(e for e in jobParams["jobName"] if e.isalnum())
+
+		ENV = Environment(loader=FileSystemLoader("/"))
+
+		jobTempDir = os.path.join(config["root-path"],"Jobs_Templete")
+		jobTemp = os.path.join(jobTempDir, "UniverseJob.yaml.template")
+
+		jobParams["hostjobPath"] = os.path.join(config["storage-mount-path"], jobPath)
+		jobParams["hostworkPath"] = os.path.join(config["storage-mount-path"], workPath)
+		jobParams["hostdataPath"] = os.path.join(config["storage-mount-path"], dataPath)
+		jobParams["nvidiaDriverPath"] = nvidiaDriverPath
+
+
+		userName = jobParams["userName"]
+		if "@" in userName:
+			userName = userName.split("@")[0].strip()
+
+		if "/" in userName:
+			userName = userName.split("/")[1].strip()
+		jobParams["userNameLabel"] = userName
+
+
+		if "mountPoints" not in jobParams:
+			jobParams["mountPoints"] = []
+
+		jobParams["mountPoints"].append({"name":"nvidia-driver","containerPath":"/usr/local/nvidia","hostPath":nvidiaDriverPath})
+		jobParams["mountPoints"].append({"name":"job","containerPath":"/job","hostPath":jobParams["hostjobPath"]})
+		jobParams["mountPoints"].append({"name":"work","containerPath":"/work","hostPath":jobParams["hostworkPath"]})
+		jobParams["mountPoints"].append({"name":"data","containerPath":"/data","hostPath":jobParams["hostdataPath"]})
+		
+		jobParams["mountPoints"].append({"name":"docker-socket","containerPath":"/var/run/docker.sock","hostPath":"/var/run/docker.sock"})
+		jobParams["mountPoints"].append({"name":"docker-exe","containerPath":"/usr/bin/docker","hostPath":"/usr/bin/docker"})
+		jobParams["mountPoints"].append({"name":"docker-directory","containerPath":"/root/.docker","hostPath":"/root/.docker"})
+		
+
+		template = ENV.get_template(os.path.abspath(jobTemp))
+		job_description = template.render(job=jobParams)
+
+		jobDescriptionList = []
+
+		jobDescriptionList.append(job_description)
+
+		if ("interactivePort" in jobParams and len(jobParams["interactivePort"].strip()) > 0):
+			ports = [p.strip() for p in re.split(",|;",jobParams["interactivePort"]) if len(p.strip()) > 0 and p.strip().isdigit()]
+			for portNum in ports:
+				jobParams["serviceId"] = "interactive-" + jobParams["jobId"] + "-" + portNum
+				jobParams["port"] = portNum
+				jobParams["port-name"] = "interactive"
+				jobParams["port-type"] = "TCP"
+
+				serviceTemplate = ENV.get_template(os.path.join(jobTempDir,"KubeSvc.yaml.template"))
+
+				template = ENV.get_template(serviceTemplate)
+				interactiveMeta = template.render(svc=jobParams)
+				jobDescriptionList.append(interactiveMeta)
+
+
+		jobDescription = "\n---\n".join(jobDescriptionList)
+
+		jobDescriptionPath = os.path.join(config["storage-mount-path"], jobParams["jobDescriptionPath"])
+		if not os.path.exists(os.path.dirname(os.path.realpath(jobDescriptionPath))):
+			os.makedirs(os.path.dirname(os.path.realpath(jobDescriptionPath)))
+		if os.path.isfile(jobDescriptionPath):
+			output = k8sUtils.kubectl_delete(jobDescriptionPath) 
+
+		with open(jobDescriptionPath, 'w') as f:
+			f.write(jobDescription)
+
+		output = k8sUtils.kubectl_create(jobDescriptionPath)	
+
+		ret["output"] = output
+		
+		ret["jobId"] = jobParams["jobId"]
+
+
+		if "userName" not in jobParams:
+			jobParams["userName"] = ""
+
+		dataHandler.UpdateJobTextField(jobParams["jobId"],"jobStatus","scheduling")
+		dataHandler.UpdateJobTextField(jobParams["jobId"],"jobDescriptionPath",jobParams["jobDescriptionPath"])
+		dataHandler.UpdateJobTextField(jobParams["jobId"],"jobDescription",base64.b64encode(jobDescription))
+
+
+		jobMeta = {}
+		jobMeta["jobDescriptionPath"] = jobParams["jobDescriptionPath"]
+		jobMeta["jobPath"] = jobParams["jobPath"]
+		jobMeta["workPath"] = jobParams["workPath"]
+		jobMeta["jobPath"] = jobParams["jobPath"]
+		jobMeta["LaunchCMD"] = jobParams["LaunchCMD"]
+
+		jobMetaStr = base64.b64encode(json.dumps(jobMeta))
+		dataHandler.UpdateJobTextField(jobParams["jobId"],"jobMeta",jobMetaStr)
+	except Exception as e:
+		print e
+		ret["error"] = str(e)
+		retries = dataHandler.AddandGetJobRetries(jobParams["jobId"])
+		if retries >= 5:
+			dataHandler.UpdateJobTextField(jobParams["jobId"],"jobStatus","error")
+			dataHandler.UpdateJobTextField(jobParams["jobId"],"errorMsg","Cannot submit job!" + str(e))
+
+	return ret
 
 def KillJob(job):
 	dataHandler = DataHandler()
@@ -619,7 +780,7 @@ def launch_ps_dist_job(jobParams):
 	workerPodInfo = k8sUtils.GetPod("distRole=worker,run=" + jobId)
 	psPodInfo = k8sUtils.GetPod("distRole=ps,run=" + jobId)
 	if "items" in workerPodInfo and len(workerPodInfo["items"]) == int(jobParams["numpsworker"]) and "items" in psPodInfo and len(psPodInfo["items"]) == int(jobParams["numps"]):
-		podStatus = [k8sUtils.check_pod_status(pod) for pod in  workerPodInfo["items"] + psPodInfo["items"] ]
+		podStatus = [k8sUtils.check_pod_status(pod) for pod in	workerPodInfo["items"] + psPodInfo["items"] ]
 		if all([status == "Running" for status in podStatus]):
 			ps_pod_names = [pod["metadata"]["name"] for pod in psPodInfo["items"]]
 			worker_pod_names = [pod["metadata"]["name"] for pod in workerPodInfo["items"]]
@@ -708,7 +869,7 @@ def create_log( logdir = '/var/log/dlworkspace' ):
 		logging_config["handlers"]["file"]["filename"] = logdir+"/jobmanager.log"
 		logging.config.dictConfig(logging_config)
 
-
+import traceback
 def Run():
 
 	while True:
@@ -734,10 +895,10 @@ def Run():
 						UpdateJobStatus(job)
 					elif job["jobStatus"] == "unapproved" :
 						AutoApproveJob(job)
-				except Exception as e:
-					print e
-		except Exception as e:
-			print e
+				except Exception:
+					traceback.print_exc()
+		except Exception:
+			traceback.print_exc()
 
 		time.sleep(1)
 

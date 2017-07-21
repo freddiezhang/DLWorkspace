@@ -33,6 +33,9 @@ spec:
     - mountPath: {{ mp.containerPath }}
       name: {{ mp.name }}
     {% endfor %}
+    env:
+    - name: FAMILY_TOKEN
+      value: {{ job["familyToken"] }}
 
   restartPolicy: Never
   volumes:
