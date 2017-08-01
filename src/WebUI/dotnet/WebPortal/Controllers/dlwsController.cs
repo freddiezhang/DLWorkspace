@@ -44,7 +44,12 @@ namespace WindowsAuth.Controllers
             var restapi = HttpContext.Session.GetString("Restapi");
             if (op == "ListJobs")
             {
-                url = restapi + "/ListJobs?userName="+HttpContext.Session.GetString("Email");
+                string useremail = HttpContext.Session.GetString("Email");
+                if (HttpContext.Request.Query.ContainsKey("Email"))
+                {
+                    useremail = HttpContext.Request.Query["Email"];
+                }
+                url = restapi + "/ListJobs?userName="+useremail;
             }
             else if (op == "KillJob" && HttpContext.Request.Query.ContainsKey("jobId"))
             {
