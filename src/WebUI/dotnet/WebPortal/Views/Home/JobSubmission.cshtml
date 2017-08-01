@@ -158,6 +158,86 @@
 
     }
 
+    function serializeSchema(form) {
+        return [].map.call(form.elements, function (el) {
+            return {
+                type: el.type,
+                name: el.id,
+                value: el.value,
+                checked: el.checked
+            };
+        });
+    };
+
+
+    function SaveTemplate() {
+        var f = document.getElementById("submit_job");
+        var schema = JSON.stringify(serializeSchema(f));
+        console.log(schema);
+        var file = new Blob([schema], { type: "text/plain" });
+
+
+        var filename = "template.json";
+        if (window.navigator.msSaveOrOpenBlob) // IE10+
+            window.navigator.msSaveOrOpenBlob(file, filename);
+        else { // Others
+            var a = document.createElement("a"),
+                url = URL.createObjectURL(file);
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(function () {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }, 0);
+        }
+    }
+
+
+    function LoadTemplate(templateData)
+    {
+        for (var i = 0; i < templateData.length; i++) {
+            console.log(templateData[i].name);
+            try {
+                if (templateData[i].type == "checkbox") {
+                    var elem = document.getElementById(templateData[i].name);
+                    elem.checked = templateData[i].checked;
+                }
+                else if (templateData[i].type == "text" || templateData[i].type == "number" || templateData[i].type == "textarea") {
+                    var elem = document.getElementById(templateData[i].name);
+                    elem.value = templateData[i].value;
+                }
+                else if (templateData[i].type == "radio") {
+                    //TODO: take care of job type 
+                }
+            }
+            catch (e) {
+                console.log(e);
+            }
+        }
+        ShowHideDiv(document.getElementById("chkInteractiveJob"), 'interactiveportfield')
+        ShowHideDiv(document.getElementById("chkLogDir"), 'logdirfield')
+
+    }
+
+    function loadFileAsText() {
+        var fileToLoad = document.getElementById("fileToLoad").files[0];
+
+        var fileReader = new FileReader();
+        fileReader.onload = function (fileLoadedEvent) {
+            var textFromFileLoaded = fileLoadedEvent.target.result;
+            //document.getElementById("inputTextToSave").value = textFromFileLoaded;
+
+            var templateData = JSON.parse(textFromFileLoaded);
+
+            LoadTemplate(templateData);
+
+        }
+        fileReader.readAsText(fileToLoad, "UTF-8");
+
+    }
+
     function UseTemplate(id) {
         if (id == "tensorflow") {
             document.getElementById("jobname").value = "tensorflow-ipython";
@@ -166,9 +246,9 @@
             document.getElementById("datapath").value = "imagenet";
             document.getElementById("jobpath").value = "";
 
-            document.getElementById("image").value = "tensorflow/tensorflow:latest-gpu";
+            document.getElementById("image").value = "mlcloudreg.westus.cloudapp.azure.com:5000/philly/agi-tf-0.12.1-src-ubuntu-16.04:latest";
             //document.getElementById("cmd").value = "";
-            document.getElementById("cmd").value = "export HOME=/job && jupyter notebook --no-browser --port=8888 --ip=0.0.0.0 --notebook-dir=/";
+            document.getElementById("cmd").value = "export HOME=/job && /usr/local/anaconda3/bin/jupyter notebook --no-browser --port=8888 --ip=0.0.0.0 --notebook-dir=/";
 
             document.getElementById("chkInteractiveJob").checked = true;
             document.getElementById("chkLogDir").checked = false;
@@ -210,8 +290,27 @@
             document.getElementById("datapath").value = "imagenet";
             document.getElementById("jobpath").value = "";
 
-            document.getElementById("image").value = "tensorflow/tensorflow:latest-gpu";
-            document.getElementById("cmd").value = "apt-get update && apt-get install -y openssh-server sudo && addgroup --force-badname --gid  @ViewData["gid"] domainusers && adduser --force-badname --home /home/@ViewData["Username"] --shell /bin/bash --uid @ViewData["uid"]  -gecos '' @ViewData["Username"] --disabled-password --gid @ViewData["gid"] && adduser @ViewData["Username"] sudo && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && mkdir -p /root/.ssh && cat /work/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys && mkdir -p /home/@ViewData["Username"]/.ssh && cat /work/.ssh/id_rsa.pub >> /home/@ViewData["Username"]/.ssh/authorized_keys && service ssh restart && sleep infinity";
+            document.getElementById("image").value = "mlcloudreg.westus.cloudapp.azure.com:5000/philly/agi-tf-0.12.1-src-ubuntu-16.04:latest";
+            document.getElementById("cmd").value = "apt-get update && apt-get install -y openssh-server sudo locales && locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8 && addgroup --force-badname --gid  @ViewData["gid"] domainusers && adduser --force-badname --home /home/@ViewData["Username"] --shell /bin/bash --uid @ViewData["uid"]  -gecos '' @ViewData["Username"] --disabled-password --gid @ViewData["gid"] && adduser @ViewData["Username"] sudo && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && mkdir -p /root/.ssh && cat /work/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys && mkdir -p /home/@ViewData["Username"]/.ssh && cat /work/.ssh/id_rsa.pub >> /home/@ViewData["Username"]/.ssh/authorized_keys && chown -R @ViewData["Username"] /home/@ViewData["Username"]/.ssh/ && service ssh restart && env | while read line; do if [[ $line != HOME=* ]] && [[ $line != INTERACTIVE* ]] ; then echo \"export $line\" >> /home/@ViewData["Username"]/.bashrc; fi; done && echo \"export PATH=/usr/local/anaconda3/bin:/usr/local/nvidia/bin:$PATH\" >> /home/@ViewData["Username"]/.bashrc && echo \"export LD_LIBRARY_PATH=/usr/local/nvidia/lib64:/usr/local/cuda/lib64:$LD_LIBRARY_PATH\" >> /home/@ViewData["Username"]/.bashrc && echo \"export PATH=/usr/local/anaconda3/bin:/usr/local/nvidia/bin:$PATH\" >> /root/.bashrc && echo \"export LD_LIBRARY_PATH=/usr/local/nvidia/lib64:/usr/local/cuda/lib64:$LD_LIBRARY_PATH\" >> /root/.bashrc  && sleep infinity";
+            document.getElementById("chkInteractiveJob").checked = true;
+            document.getElementById("chkLogDir").checked = false;
+            ShowHideDiv(document.getElementById("chkInteractiveJob"), 'interactiveportfield')
+            ShowHideDiv(document.getElementById("chkLogDir"), 'logdirfield')
+
+            document.getElementById("interactivePort").value = "22";
+            document.getElementById("logdir").value = "";
+            document.getElementById("runningasroot").checked = true;
+
+        }
+        else if (id == "pytorchssh") {
+            document.getElementById("jobname").value = "pytorch-ssh";
+            document.getElementById("resourcegpu").value = 0;
+            document.getElementById("workpath").value = "@ViewData["Username"]";
+            document.getElementById("datapath").value = "imagenet";
+            document.getElementById("jobpath").value = "";
+
+            document.getElementById("image").value = "mlcloudreg.westus.cloudapp.azure.com:5000/philly/agi-pytorch-beta-0512017:latest";
+            document.getElementById("cmd").value = "apt-get update && apt-get install -y openssh-server sudo locales && locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8 && addgroup --force-badname --gid  @ViewData["gid"] domainusers && adduser --force-badname --home /home/@ViewData["Username"] --shell /bin/bash --uid @ViewData["uid"]  -gecos '' @ViewData["Username"] --disabled-password --gid @ViewData["gid"] && adduser @ViewData["Username"] sudo && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && mkdir -p /root/.ssh && cat /work/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys && mkdir -p /home/@ViewData["Username"]/.ssh && cat /work/.ssh/id_rsa.pub >> /home/@ViewData["Username"]/.ssh/authorized_keys && chown -R @ViewData["Username"] /home/@ViewData["Username"]/.ssh/ && service ssh restart && env | while read line; do if [[ $line != HOME=* ]] && [[ $line != INTERACTIVE* ]] ; then echo \"export $line\" >> /home/@ViewData["Username"]/.bashrc; fi; done && echo \"export PATH=/usr/local/anaconda3/bin:/usr/local/nvidia/bin:$PATH\" >> /home/@ViewData["Username"]/.bashrc && echo \"export LD_LIBRARY_PATH=/usr/local/nvidia/lib64:/usr/local/cuda/lib64:$LD_LIBRARY_PATH\" >> /home/@ViewData["Username"]/.bashrc && echo \"export PATH=/usr/local/anaconda3/bin:/usr/local/nvidia/bin:$PATH\" >> /root/.bashrc && echo \"export LD_LIBRARY_PATH=/usr/local/nvidia/lib64:/usr/local/cuda/lib64:$LD_LIBRARY_PATH\" >> /root/.bashrc  && sleep infinity";
             document.getElementById("chkInteractiveJob").checked = true;
             document.getElementById("chkLogDir").checked = false;
             ShowHideDiv(document.getElementById("chkInteractiveJob"), 'interactiveportfield')
@@ -350,21 +449,22 @@
                     <label>
                         Use Template
                     </label>
-                    <br />
-                    <select onchange="UseTemplate(this.value)"> 
-                        <option value="none">None</option>
-                        <option value="tensorflow">Tensorflow-IPython-GPU</option>
-                        <option value="tensorflowcpu">Tensorflow-IPython-CPU</option>
-                        <option value="tensorflowssh">Tensorflow-SSH</option>
-                        <option value="caffe">Caffe-IPython</option>
-                        <option value="caffessh">Caffe-SSH</option>
-                        <option value="caffesample">Caffe training example</option>
-                        <option value="tensorflowsample">Tensorflow training example</option>
-                        <option value="cntkipython">CNTK-IPython</option>
-                        
-                    </select>
+                        <br />
+                        <select onchange="UseTemplate(this.value)">
+                            <option value="none">None</option>
+                            <option value="tensorflow">Tensorflow-IPython-GPU</option>
+                            <option value="tensorflowcpu">Tensorflow-IPython-CPU</option>
+                            <option value="tensorflowssh">Tensorflow-SSH</option>
+                            <option value="pytorchssh">pytorch-SSH</option>
+                            <option value="caffe">Caffe-IPython</option>
+                            <option value="caffessh">Caffe-SSH</option>
+                            <option value="caffesample">Caffe training example</option>
+                            <option value="tensorflowsample">Tensorflow training example</option>
+                            <option value="cntkipython">CNTK-IPython</option>
 
-                </div>
+                        </select>
+
+</div>
                 <div class="form-group">
                     <label>
                         Job Type
@@ -379,6 +479,19 @@
                         Job Name
                     </label>
                     <input type="text" class="form-control" id="jobname" />
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        Docker Image
+                    </label>
+                    <input list="imagelist" class="form-control" name="image" id="image" />
+                    <datalist id="imagelist">
+                        <option value="mlcloudreg.westus.cloudapp.azure.com:5000/philly/agi-tf-0.12.1-src-ubuntu-16.04:latest" />
+                        <option value="mlcloudreg.westus.cloudapp.azure.com:5000/philly/agi-tf-1.1.0-src-ubuntu-16.04:latest" />
+                        <option value="mlcloudreg.westus.cloudapp.azure.com:5000/philly/agi-pytorch-beta-0512017:latest" />
+                        <option value="mlcloudreg.westus.cloudapp.azure.com:5000/philly/custom-tf-r1-2-ubuntu-16-04-cuda8:latest" />
+                    </datalist>
                 </div>
 
                 <div class="form-group">
@@ -428,17 +541,6 @@
                     <input type="text" class="form-control" id="jobpath" />
                 </div>
 
-                <div class="form-group">
-                    <label>
-                        Docker Image
-                    </label>
-                    <input list="imagelist" class="form-control" name="image" id="image" />
-                    <datalist  id="imagelist">
-                        <option value="mlcloudreg.westus.cloudapp.azure.com:5000/philly/agi-tf-0.12.1-src-ubuntu-16.04:latest" />
-                        <option value="mlcloudreg.westus.cloudapp.azure.com:5000/philly/agi-tf-1.1.0-src-ubuntu-16.04:latest" />
-                        <option value="mlcloudreg.westus.cloudapp.azure.com:5000/philly/agi-tf-pytorch-0.12.1-src-ubuntu-16.04:latest" />
-                    </datalist>
-                </div>
 
                 <div class="form-group">
                     <label>
@@ -476,10 +578,48 @@
                     </label>
                 </div>
 
-            </div>
-            <div class="modal-footer">
+
+                
+                
+
+</div>
+        <div class="modal-footer">
                 <input type="submit" value="Submit" name="submit" class="btn btn-success" id="submit" />
             </div>
         </form>
+
+
+
+
+        <div class="form-group">
+            <input type="checkbox" id="chkSaveLoadTemplate" onclick="ShowHideDiv(this, 'saveloadtemplate')" />
+            <label>
+                Save or Load Template from File?
+            </label>
+        </div>
+
+        <div id="saveloadtemplate" hidden>
+            <div class="form-group">
+
+                <label>
+                    Save the Current Template to a File:
+                </label>
+                <br />
+                <button onclick="SaveTemplate()"> Save </button>
+            </div>
+
+            <div class="form-group">
+
+                <label>
+                    Load Template from a Saved File:
+                </label>
+                <input type="file" id="fileToLoad">
+                <button onclick="loadFileAsText()">
+                    Load
+                </button>
+            </div>
+        </div>
+
+
     </div>
 </div>
