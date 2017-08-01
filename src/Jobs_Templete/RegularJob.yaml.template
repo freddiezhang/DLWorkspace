@@ -27,8 +27,11 @@ spec:
     - mountPath: {{ mp.containerPath }}
       name: {{ mp.name }}
     {% endfor %}
-
-
+    - mountPath: /dev
+      name: dev
+    - mountPath: /dev/shm
+      name: dshm
+      
   restartPolicy: Never
   volumes:
   {% for mp in job["mountPoints"] %}
@@ -36,3 +39,9 @@ spec:
     hostPath:
       path: {{ mp.hostPath }}
   {% endfor %}
+  - name: dev
+    hostPath:
+      path: /dev  
+  - name: dshm
+    emptyDir:
+      medium: Memory
