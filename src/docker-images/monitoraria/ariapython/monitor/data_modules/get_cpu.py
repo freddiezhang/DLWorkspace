@@ -25,14 +25,14 @@ class get_cpu(object):
         container_response = requests.get(container_url).json()
         machine_response = requests.get(machine_url).json()
 
-        timestamp1 = str(container_response['stats'][6]['timestamp'])
-        timestamp2 = str(container_response['stats'][7]['timestamp'])
+        timestamp1 = str(container_response['stats'][5]['timestamp'])
+        timestamp2 = str(container_response['stats'][6]['timestamp'])
 
         interval = get_cpu.timediff(timestamp1, timestamp2)
 
         max_computations = machine_response['num_cores'] * 1000000000 * interval
-        num_computations = container_response['stats'][7]['cpu']['usage']['total'] - \
-                           container_response['stats'][6]['cpu']['usage']['total']
+        num_computations = container_response['stats'][6]['cpu']['usage']['total'] - \
+                           container_response['stats'][5]['cpu']['usage']['total']
 
         # return as a percent
         return float(num_computations / max_computations) * 100

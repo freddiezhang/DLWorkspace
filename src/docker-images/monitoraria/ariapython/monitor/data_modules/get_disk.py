@@ -11,8 +11,8 @@ class get_disk(object):
         disks = {}
 
         disk_map = machine_response['disk_map']
+        print(str(disk_map))
 
-        #figure this out!!
         for drive in disk_map:
             drive_stat = disk_map[drive]
             name = drive_stat['name']
@@ -21,13 +21,17 @@ class get_disk(object):
             minor = drive_stat['minor']
             disks[(major, minor)] = [name, 0, capacity]
         
-        #all disk usage
-        a_disk_usage = container_response['stats'][7]['diskio']['io_service_bytes']
+        print(" ")
+        #all disk usage, unfortunately inconsistent so I can't pull the most recent data
+        a_disk_usage = container_response['stats'][6]['diskio']['io_service_bytes']
+        print(str(a_disk_usage))
         #trimmed disk usage
         for disk in a_disk_usage:
-            if disk['stats']['Total'] != 0:
-                major = disk['major']
-                minor = disk['minor']
+            major = disk['major']
+            minor = disk['minor']
+            # pretty sloppy fix, I don't know which major/minor numbers are important
+            if (major, minor) in disks:
+                print(str(major) + " " + str(minor))
                 disks[(major, minor)][1] = disk['stats']['Total']
         
         return disks

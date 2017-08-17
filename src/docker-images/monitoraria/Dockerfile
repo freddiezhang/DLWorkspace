@@ -2,7 +2,7 @@
 FROM ubuntu:16.04
 
 RUN apt-get update; apt-get install -y python3-dev python3-pip
-RUN pip3 install --upgrade pip; pip3 install setuptools six
+RUN pip3 install --upgrade pip; pip3 install setuptools six requests
 
 WORKDIR /monitoraria
 # ADD get-pip.py /monitoraria

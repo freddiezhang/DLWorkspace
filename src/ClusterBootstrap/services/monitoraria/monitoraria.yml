@@ -9,11 +9,13 @@ spec:
       labels:
         monitoraria-node: pod
     spec:
+      dnsPolicy: Default
       nodeSelector:
         monitoraria: active
+      hostNetwork: true
       containers:
-      - image: monitoraria:latest
-        # imagePullPolicy: Always
+      - image: mlcloudreg.westus.cloudapp.azure.com:5000/onenet04/monitoraria:latest
+        imagePullPolicy: Always
         name: monitoraria
         #volumeMounts:
         #- mountPath:

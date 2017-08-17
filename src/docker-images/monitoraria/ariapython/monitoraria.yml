@@ -1,0 +1,22 @@
+kind: DaemonSet
+apiVersion: extensions/v1beta1 # ?
+metadata:
+  name: monitoraria
+  labels:
+spec:
+  template:
+    metadata:
+      name: monitoraria
+    spec:
+      nodeSelector:
+        monitoraria: active
+      containers:
+      - image: monitoraria:latest
+        # imagePullPolicy: Always
+        name: monitoraria
+        #volumeMounts:
+        #- mountPath:
+        #  name:
+        #ports:
+        #- name:
+      #volumes:

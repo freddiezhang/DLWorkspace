@@ -11,7 +11,7 @@ class get_memory(object):
 
         # is this disk or RAM? assume RAM as 200GB disk seems small
         max_memory = machine_response['memory_capacity']
-        used_memory = container_response['stats'][7]['memory']['usage']
+        used_memory = container_response['stats'][6]['memory']['usage']
         #return as a percent
         return float(used_memory) / float(max_memory) * 100
 

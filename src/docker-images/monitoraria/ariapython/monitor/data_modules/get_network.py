@@ -22,8 +22,8 @@ class get_network(object):
         container_response = requests.get(container_url).json()
         machine_response = requests.get(machine_url).json()
 
-        curr_interface_usage = container_response['stats'][7]['network']['interfaces']
-        past_interface_usage = container_response['stats'][6]['network']['interfaces']
+        curr_interface_usage = container_response['stats'][6]['network']['interfaces']
+        past_interface_usage = container_response['stats'][5]['network']['interfaces']
 
         bytes_moved = 0
         for index in range (0, len(curr_interface_usage)):
@@ -36,8 +36,8 @@ class get_network(object):
         for index in range (0, len(interfaces)):
             c_net_speed += interfaces[index]['speed']
 
-        timestamp1 = str(container_response['stats'][6]['timestamp'])
-        timestamp2 = str(container_response['stats'][7]['timestamp'])
+        timestamp1 = str(container_response['stats'][5]['timestamp'])
+        timestamp2 = str(container_response['stats'][6]['timestamp'])
 
         interval = get_network.timediff(timestamp1, timestamp2)
         c_net_speed = c_net_speed * 125000 * interval
