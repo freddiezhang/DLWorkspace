@@ -200,19 +200,22 @@ namespace WindowsAuth
             var optionsBuilderTemplatesMaster = new DbContextOptionsBuilder<ClusterContext>();
             optionsBuilderTemplatesMaster.UseSqlServer(connectionTemplatesMaster);
             var templateMasterDatabase = new ClusterContext(optionsBuilderTemplatesMaster.Options);
-            templateMasterDatabase.Database.EnsureCreated();
+            var created = templateMasterDatabase.Database.EnsureCreated();
             MasterDatabase = templateMasterDatabase;
 
-	    using (var file = File.OpenText(@"./Master-Templates.json"))
-	    using (var reader = new JsonTextReader(file))
+	    if (created)
 	    {
-		foreach (var template in (JArray)JToken.ReadFrom(reader))
+		using (var file = File.OpenText("./Master-Templates.json"))
+		using (var reader = new JsonTextReader(file))
 		{
-		    template = (JObject)template;
-		    var TName = template["Name"].Value<string>;
-		    var TJson = template["Json"].Value<string>;
-		    var sql = @"INSERT INTO dbo.Template (Template, Json, Type) VALUES ({0}, {1}, job)";
-		    MasterDatabase.ExecuteSqlCommand(sql, TName, TJson);
+		    foreach (var templateTok in (JArray)JToken.ReadFrom(reader))
+		    {
+			var template = (JObject)templateTok;
+			var TName = template["Name"].Value<string>();
+			var TJson = template["Json"].Value<string>();
+			var sql = @"INSERT INTO dbo.Template (Template, Json, Type) VALUES ({0}, {1}, job)";
+			MasterDatabase.Database.ExecuteSqlCommand(sql, TName, TJson);
+		    }
 		}
 	    }
 
