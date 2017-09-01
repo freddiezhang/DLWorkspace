@@ -25,6 +25,8 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Http;
 
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace WindowsAuth
 {
@@ -201,6 +203,18 @@ namespace WindowsAuth
             templateMasterDatabase.Database.EnsureCreated();
             MasterDatabase = templateMasterDatabase;
 
+	    using (var file = File.OpenText(@"./Master-Templates.json"))
+	    using (var reader = new JsonTextReader(file))
+	    {
+		foreach (var template in (JArray)JToken.ReadFrom(reader))
+		{
+		    template = (JObject)template;
+		    var TName = template["Name"].Value<string>;
+		    var TJson = template["Json"].Value<string>;
+		    var sql = @"INSERT INTO dbo.Template (Template, Json, Type) VALUES ({0}, {1}, job)";
+		    MasterDatabase.ExecuteSqlCommand(sql, TName, TJson);
+		}
+	    }
 
             if (String.IsNullOrEmpty(defaultClusterName))
                 defaultClusterName = Clusters.Keys.First<string>();
