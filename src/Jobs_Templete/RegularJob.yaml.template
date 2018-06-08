@@ -21,11 +21,17 @@ spec:
     resources:
       limits:
         alpha.kubernetes.io/nvidia-gpu: {{ job["resourcegpu"] }}
-
+        #memory: "{{job["resourcegpu"]|int * 30}}Gi"
+        memory: "120Gi"
+      requests:
+        memory: "1Gi"
     volumeMounts:
     {% for mp in job["mountPoints"] %}
     - mountPath: {{ mp.containerPath }}
       name: {{ mp.name }}
+      {% if mp.readOnly == 'True' %}
+      readOnly: true
+      {% endif %}
     {% endfor %}
     - mountPath: /dev
       name: dev

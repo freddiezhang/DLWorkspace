@@ -83,9 +83,9 @@ def SubmitRegularJob(job):
 			dataHandler.SetJobError(jobParams["jobId"],"ERROR: work-path does not exist")
 			return False
 
-		if "dataPath" not in jobParams or len(jobParams["dataPath"].strip()) == 0: 
-			dataHandler.SetJobError(jobParams["jobId"],"ERROR: data-path does not exist")
-			return False
+		#if "dataPath" not in jobParams or len(jobParams["dataPath"].strip()) == 0: 
+		#	dataHandler.SetJobError(jobParams["jobId"],"ERROR: data-path does not exist")
+		#	return False
 
 
 		jobPath,workPath,dataPath = GetStoragePath(jobParams["jobPath"],jobParams["workPath"],jobParams["dataPath"])
@@ -142,10 +142,16 @@ def SubmitRegularJob(job):
 		if "mountPoints" not in jobParams:
 			jobParams["mountPoints"] = []
 
-		jobParams["mountPoints"].append({"name":"nvidia-driver","containerPath":"/usr/local/nvidia","hostPath":nvidiaDriverPath})
+		jobParams["mountPoints"].append({"name":"nvidia-driver","containerPath":"/usr/local/nvidia","hostPath":nvidiaDriverPath,"readOnly": "True"})
 		jobParams["mountPoints"].append({"name":"job","containerPath":"/job","hostPath":jobParams["hostjobPath"]})
 		jobParams["mountPoints"].append({"name":"work","containerPath":"/work","hostPath":jobParams["hostworkPath"]})
-		jobParams["mountPoints"].append({"name":"data","containerPath":"/data","hostPath":jobParams["hostdataPath"]})
+		jobParams["mountPoints"].append({"name":"data","containerPath":"/data","hostPath":jobParams["hostdataPath"],"readOnly": "True"})
+
+
+        #hostuserdataPath is custimized and hard-coded for wit cluster, shouldn't be merged to the main branch. 
+		jobParams["hostuserdataPath"] = os.path.join(config["storage-mount-path"], "storage/users/"+userName)
+		jobParams["mountPoints"].append({"name":"userdata","containerPath":"/userdata","hostPath":jobParams["hostuserdataPath"]})
+
 
 
 		template = ENV.get_template(os.path.abspath(jobTemp))

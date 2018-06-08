@@ -280,6 +280,32 @@ api.add_resource(AddUser, '/AddUser')
 
 
 
+class ExecContainer(Resource):
+	def get(self):
+		parser.add_argument('userName')
+		parser.add_argument('jobId')
+		parser.add_argument('cmd')
+		args = parser.parse_args()	
+		userName = args["userName"]
+		jobId = args["jobId"]
+		cmd = args["cmd"]
+
+		JobRestAPIUtils.ExecContainer(userName, jobId, cmd)
+
+		exec_status = {}
+		exec_status["status"] = ""
+		exec_status["output"] = ""
+
+		resp = jsonify(exec_status)
+		resp.headers["Access-Control-Allow-Origin"] = "*"
+		resp.headers["dataType"] = "json"
+
+		return resp
+##
+## Actually setup the Api resource routing here
+##
+api.add_resource(ExecContainer, '/execcontainer')
+
 
 if __name__ == '__main__':
-	app.run(debug=False,host="0.0.0.0",threaded=True)
+	app.run(debug=False,host="0.0.0.0",port="5005",threaded=True)

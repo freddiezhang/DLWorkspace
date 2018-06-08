@@ -858,6 +858,9 @@ def gen_configs():
 	config["api_servers"] = "https://"+config["kubernetes_master_node"][0]+":"+str(config["k8sAPIport"])
 	config["etcd_endpoints"] = ",".join(["https://"+x+":"+config["etcd3port1"] for x in config["etcd_node"]])
 
+	config["webportal_node"] = None if len(get_node_lists_for_service("webportal"))==0 else get_node_lists_for_service("webportal")[0]
+
+
 	if os.path.isfile(config["ssh_cert"]+".pub"):
 		f = open(config["ssh_cert"]+".pub")
 		sshkey_public = f.read()
