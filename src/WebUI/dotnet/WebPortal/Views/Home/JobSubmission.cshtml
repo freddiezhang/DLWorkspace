@@ -246,7 +246,7 @@
             document.getElementById("datapath").value = "imagenet";
             document.getElementById("jobpath").value = "";
 
-            document.getElementById("image").value = "mlcloudreg.westus.cloudapp.azure.com:5000/philly/agi-tf-0.12.1-src-ubuntu-16.04:latest";
+            document.getElementById("image").value = "mlcloudreg.westus.cloudapp.azure.com:5000/philly/agi-default-tf1.9.0-py36-gpu:latest";
             //document.getElementById("cmd").value = "";
             document.getElementById("cmd").value = "export HOME=/job && /usr/local/anaconda3/bin/jupyter notebook --no-browser --port=8888 --ip=0.0.0.0 --notebook-dir=/";
 
@@ -290,7 +290,7 @@
             document.getElementById("datapath").value = "imagenet";
             document.getElementById("jobpath").value = "";
 
-            document.getElementById("image").value = "mlcloudreg.westus.cloudapp.azure.com:5000/philly/agi-tf-0.12.1-src-ubuntu-16.04:latest";
+            document.getElementById("image").value = "mlcloudreg.westus.cloudapp.azure.com:5000/philly/agi-default-tf1.9.0-py36-gpu:latest";
             document.getElementById("cmd").value = "apt-get update && apt-get install -y openssh-server sudo locales && locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8 && addgroup --force-badname --gid  @ViewData["gid"] domainusers && adduser --force-badname --home /home/@ViewData["Username"] --shell /bin/bash --uid @ViewData["uid"]  -gecos '' @ViewData["Username"] --disabled-password --gid @ViewData["gid"] && adduser @ViewData["Username"] sudo && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && mkdir -p /root/.ssh && cat /work/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys && mkdir -p /home/@ViewData["Username"]/.ssh && cat /work/.ssh/id_rsa.pub >> /home/@ViewData["Username"]/.ssh/authorized_keys && chown -R @ViewData["Username"] /home/@ViewData["Username"]/.ssh/ && service ssh restart && env | while read line; do if [[ $line != HOME=* ]] && [[ $line != INTERACTIVE* ]] ; then echo \"export $line\" >> /home/@ViewData["Username"]/.bashrc; fi; done && echo \"export PATH=/usr/local/anaconda3/bin:/usr/local/nvidia/bin:$PATH\" >> /home/@ViewData["Username"]/.bashrc && echo \"export LD_LIBRARY_PATH=/usr/local/nvidia/lib64:/usr/local/cuda/lib64:$LD_LIBRARY_PATH\" >> /home/@ViewData["Username"]/.bashrc && echo \"export PATH=/usr/local/anaconda3/bin:/usr/local/nvidia/bin:$PATH\" >> /root/.bashrc && echo \"export LD_LIBRARY_PATH=/usr/local/nvidia/lib64:/usr/local/cuda/lib64:$LD_LIBRARY_PATH\" >> /root/.bashrc  && sleep infinity";
             document.getElementById("chkInteractiveJob").checked = true;
             document.getElementById("chkLogDir").checked = false;
@@ -309,7 +309,7 @@
             document.getElementById("datapath").value = "imagenet";
             document.getElementById("jobpath").value = "";
 
-            document.getElementById("image").value = "mlcloudreg.westus.cloudapp.azure.com:5000/philly/agi-tf-0.12.1-src-ubuntu-16.04:latest";
+            document.getElementById("image").value = "mlcloudreg.westus.cloudapp.azure.com:5000/philly/agi-default-tf1.9.0-py36-gpu:latest";
             document.getElementById("cmd").value = "apt-get update && apt-get install -y openssh-server sudo locales && locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8 && addgroup --force-badname --gid  @ViewData["gid"] domainusers && adduser --force-badname --home /home/@ViewData["Username"] --shell /bin/bash --uid @ViewData["uid"]  -gecos '' @ViewData["Username"] --disabled-password --gid @ViewData["gid"] && adduser @ViewData["Username"] sudo && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && mkdir -p /root/.ssh && cat /work/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys && mkdir -p /home/@ViewData["Username"]/.ssh && cat /work/.ssh/id_rsa.pub >> /home/@ViewData["Username"]/.ssh/authorized_keys && chown -R @ViewData["Username"] /home/@ViewData["Username"]/.ssh/ && apt-get install debconf-utils && echo \"keyboard-configuration  keyboard-configuration/layout   select  English (US)\" | debconf-set-selections && echo \"keyboard-configuration  keyboard-configuration/variant  select  English (US)\" | debconf-set-selections && apt-get -y install xorg openbox && echo \"X11UseLocalhost no\" | tee -a /etc/ssh/sshd_config && service ssh restart && env | while read line; do if [[ $line != HOME=* ]] && [[ $line != INTERACTIVE* ]] ; then echo \"export $line\" >> /home/@ViewData["Username"]/.bashrc; fi; done && echo \"export PATH=/usr/local/anaconda3/bin:/usr/local/nvidia/bin:$PATH\" >> /home/@ViewData["Username"]/.bashrc && echo \"export LD_LIBRARY_PATH=/usr/local/nvidia/lib64:/usr/local/cuda/lib64:$LD_LIBRARY_PATH\" >> /home/@ViewData["Username"]/.bashrc && echo \"export PATH=/usr/local/anaconda3/bin:/usr/local/nvidia/bin:$PATH\" >> /root/.bashrc && echo \"export LD_LIBRARY_PATH=/usr/local/nvidia/lib64:/usr/local/cuda/lib64:$LD_LIBRARY_PATH\" >> /root/.bashrc  && sleep infinity";
             document.getElementById("chkInteractiveJob").checked = true;
             document.getElementById("chkLogDir").checked = false;
@@ -328,7 +328,7 @@
             document.getElementById("datapath").value = "imagenet";
             document.getElementById("jobpath").value = "";
 
-            document.getElementById("image").value = "mlcloudreg.westus.cloudapp.azure.com:5000/philly/agi-pytorch-beta-0512017:latest";
+            document.getElementById("image").value = "mlcloudreg.westus.cloudapp.azure.com:5000/philly/pytorch04";
             document.getElementById("cmd").value = "apt-get update && apt-get install -y openssh-server sudo locales && locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8 && addgroup --force-badname --gid  @ViewData["gid"] domainusers && adduser --force-badname --home /home/@ViewData["Username"] --shell /bin/bash --uid @ViewData["uid"]  -gecos '' @ViewData["Username"] --disabled-password --gid @ViewData["gid"] && adduser @ViewData["Username"] sudo && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && mkdir -p /root/.ssh && cat /work/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys && mkdir -p /home/@ViewData["Username"]/.ssh && cat /work/.ssh/id_rsa.pub >> /home/@ViewData["Username"]/.ssh/authorized_keys && chown -R @ViewData["Username"] /home/@ViewData["Username"]/.ssh/ && service ssh restart && env | while read line; do if [[ $line != HOME=* ]] && [[ $line != INTERACTIVE* ]] ; then echo \"export $line\" >> /home/@ViewData["Username"]/.bashrc; fi; done && echo \"export PATH=/usr/local/anaconda3/bin:/usr/local/nvidia/bin:$PATH\" >> /home/@ViewData["Username"]/.bashrc && echo \"export LD_LIBRARY_PATH=/usr/local/nvidia/lib64:/usr/local/cuda/lib64:$LD_LIBRARY_PATH\" >> /home/@ViewData["Username"]/.bashrc && echo \"export PATH=/usr/local/anaconda3/bin:/usr/local/nvidia/bin:$PATH\" >> /root/.bashrc && echo \"export LD_LIBRARY_PATH=/usr/local/nvidia/lib64:/usr/local/cuda/lib64:$LD_LIBRARY_PATH\" >> /root/.bashrc  && sleep infinity";
             document.getElementById("chkInteractiveJob").checked = true;
             document.getElementById("chkLogDir").checked = false;
@@ -347,7 +347,7 @@
             document.getElementById("datapath").value = "imagenet";
             document.getElementById("jobpath").value = "";
 
-            document.getElementById("image").value = "mlcloudreg.westus.cloudapp.azure.com:5000/philly/agi-pytorch-beta-0512017:latest";
+            document.getElementById("image").value = "mlcloudreg.westus.cloudapp.azure.com:5000/philly/pytorch04";
             document.getElementById("cmd").value = "apt-get update && apt-get install -y openssh-server sudo locales && locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8 && addgroup --force-badname --gid  @ViewData["gid"] domainusers && adduser --force-badname --home /home/@ViewData["Username"] --shell /bin/bash --uid @ViewData["uid"]  -gecos '' @ViewData["Username"] --disabled-password --gid @ViewData["gid"] && adduser @ViewData["Username"] sudo && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && mkdir -p /root/.ssh && cat /work/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys && mkdir -p /home/@ViewData["Username"]/.ssh && cat /work/.ssh/id_rsa.pub >> /home/@ViewData["Username"]/.ssh/authorized_keys && chown -R @ViewData["Username"] /home/@ViewData["Username"]/.ssh/ && apt-get install debconf-utils && echo \"keyboard-configuration  keyboard-configuration/layout   select  English (US)\" | debconf-set-selections && echo \"keyboard-configuration  keyboard-configuration/variant  select  English (US)\" | debconf-set-selections && apt-get -y install xorg openbox && echo \"X11UseLocalhost no\" | tee -a /etc/ssh/sshd_config && service ssh restart && env | while read line; do if [[ $line != HOME=* ]] && [[ $line != INTERACTIVE* ]] ; then echo \"export $line\" >> /home/@ViewData["Username"]/.bashrc; fi; done && echo \"export PATH=/usr/local/anaconda3/bin:/usr/local/nvidia/bin:$PATH\" >> /home/@ViewData["Username"]/.bashrc && echo \"export LD_LIBRARY_PATH=/usr/local/nvidia/lib64:/usr/local/cuda/lib64:$LD_LIBRARY_PATH\" >> /home/@ViewData["Username"]/.bashrc && echo \"export PATH=/usr/local/anaconda3/bin:/usr/local/nvidia/bin:$PATH\" >> /root/.bashrc && echo \"export LD_LIBRARY_PATH=/usr/local/nvidia/lib64:/usr/local/cuda/lib64:$LD_LIBRARY_PATH\" >> /root/.bashrc  && sleep infinity";
             document.getElementById("chkInteractiveJob").checked = true;
             document.getElementById("chkLogDir").checked = false;
@@ -355,112 +355,6 @@
             ShowHideDiv(document.getElementById("chkLogDir"), 'logdirfield')
 
             document.getElementById("interactivePort").value = "22";
-            document.getElementById("logdir").value = "";
-            document.getElementById("runningasroot").checked = true;
-
-        }
-        else if (id == "caffe") {
-            document.getElementById("jobname").value = "caffe-ipython";
-            document.getElementById("resourcegpu").value = 0;
-            document.getElementById("workpath").value = "@ViewData["Username"]";
-            document.getElementById("datapath").value = "imagenet";
-            document.getElementById("jobpath").value = "";
-
-            document.getElementById("image").value = "bvlc/caffe:cpu";
-            //document.getElementById("cmd").value = "pip install jupyter && jupyter notebook --no-browser --port=8889 --allow-root --ip=0.0.0.0 --notebook-dir=/work";
-            document.getElementById("cmd").value = "apt-get update && apt-get install -y python-pip sudo && addgroup --force-badname --gid  @ViewData["gid"] domainusers && adduser --force-badname --home /home/@ViewData["Username"] --shell /bin/bash --uid @ViewData["uid"]  -gecos '' @ViewData["Username"] --disabled-password --gid @ViewData["gid"] && pip install jupyter && cd /home/@ViewData["Username"] && sudo -H -u @ViewData["UserName"] jupyter notebook --no-browser --port=8889 --ip=0.0.0.0 --notebook-dir=/";
-
-
-
-
-            document.getElementById("chkInteractiveJob").checked = true;
-            document.getElementById("chkLogDir").checked = false;
-            ShowHideDiv(document.getElementById("chkInteractiveJob"), 'interactiveportfield')
-            ShowHideDiv(document.getElementById("chkLogDir"), 'logdirfield')
-
-            document.getElementById("interactivePort").value = "8889";
-            document.getElementById("logdir").value = "";
-            document.getElementById("runningasroot").checked = true;
-
-        }
-        else if (id == "caffessh") {
-            document.getElementById("jobname").value = "caffe-ssh";
-            document.getElementById("resourcegpu").value = 0;
-            document.getElementById("workpath").value = "@ViewData["Username"]";
-            document.getElementById("datapath").value = "imagenet";
-            document.getElementById("jobpath").value = "";
-
-            document.getElementById("image").value = "bvlc/caffe:cpu";
-            document.getElementById("cmd").value = "apt-get update && apt-get install -y openssh-server sudo && addgroup --force-badname --gid  @ViewData["gid"] domainusers && adduser --force-badname --home /home/@ViewData["Username"] --shell /bin/bash --uid @ViewData["uid"]  -gecos '' @ViewData["Username"] --disabled-password --gid @ViewData["gid"] && adduser @ViewData["Username"] sudo && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && mkdir -p /root/.ssh && cat /work/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys && mkdir -p /home/@ViewData["Username"]/.ssh && cat /work/.ssh/id_rsa.pub >> /home/@ViewData["Username"]/.ssh/authorized_keys && cp /work/.ssh/id_rsa* /home/@ViewData["Username"]/.ssh/ && chown -R @ViewData["Username"] /home/@ViewData["Username"]/.ssh/ && service ssh restart && env | while read line; do if [[ $line != HOME=* ]] && [[ $line != INTERACTIVE* ]] ; then echo \"export $line\" >> /home/@ViewData["Username"]/.bashrc; fi; done &&  sleep infinity";
-            document.getElementById("chkInteractiveJob").checked = true;
-            document.getElementById("chkLogDir").checked = false;
-            ShowHideDiv(document.getElementById("chkInteractiveJob"), 'interactiveportfield')
-            ShowHideDiv(document.getElementById("chkLogDir"), 'logdirfield')
-
-            document.getElementById("interactivePort").value = "22";
-            document.getElementById("logdir").value = "";
-            document.getElementById("runningasroot").checked = true;
-
-        }
-        else if (id == "caffesample")
-        {
-            document.getElementById("jobname").value = "caffe training example - resnet18";
-            document.getElementById("resourcegpu").value = 1;
-            document.getElementById("workpath").value = "samples";
-            document.getElementById("datapath").value = "imagenet";
-            document.getElementById("jobpath").value = "";
-
-            document.getElementById("image").value = "bvlc/caffe:gpu";
-            document.getElementById("cmd").value = "caffe train -solver /work/caffe/solver_resnet18.prototxt";
-
-            document.getElementById("chkLogDir").checked = false;
-            document.getElementById("chkInteractiveJob").checked = false;
-            ShowHideDiv(document.getElementById("chkInteractiveJob"), 'interactiveportfield')
-            ShowHideDiv(document.getElementById("chkLogDir"), 'logdirfield')
-
-            document.getElementById("interactivePort").value = "";
-            document.getElementById("logdir").value = "";
-            document.getElementById("runningasroot").checked = false;
-
-        }
-        else if (id == "tensorflowsample") {
-            document.getElementById("jobname").value = "Tensorflow training example - inception";
-            document.getElementById("resourcegpu").value = 1;
-            document.getElementById("workpath").value = "samples";
-            document.getElementById("datapath").value = "imagenet";
-            document.getElementById("jobpath").value = "";
-
-            document.getElementById("image").value = "tensorflow/tensorflow:0.12.1-gpu";
-            document.getElementById("cmd").value = "/work/tensorflow/models/inception/bazel-bin/inception/imagenet_train --num_gpus=1 --batch_size=32 --train_dir=/job/model --data_dir=/data/tensor";
-
-            document.getElementById("chkLogDir").checked = false;
-            document.getElementById("chkInteractiveJob").checked = false;
-            ShowHideDiv(document.getElementById("chkInteractiveJob"), 'interactiveportfield')
-            ShowHideDiv(document.getElementById("chkLogDir"), 'logdirfield')
-
-            document.getElementById("interactivePort").value = "";
-            document.getElementById("logdir").value = "";
-            document.getElementById("runningasroot").checked = false;
-
-        }
-        else if (id == "cntkipython") {
-            document.getElementById("jobname").value = "CNTK-ipython";
-            document.getElementById("resourcegpu").value = 0;
-            document.getElementById("workpath").value = "@ViewData["Username"]";
-            document.getElementById("datapath").value = "imagenet";
-            document.getElementById("jobpath").value = "";
-
-            document.getElementById("image").value = "microsoft/cntk";
-            //document.getElementById("cmd").value = "pip install jupyter && jupyter notebook --no-browser --port=8889 --allow-root --ip=0.0.0.0 --notebook-dir=/work";
-            document.getElementById("cmd").value = "bash -c 'source \"/cntk/activate-cntk\" ; jupyter notebook --no-browser --port=8889 --ip=0.0.0.0 --notebook-dir=/ --allow-root'";
-
-
-            document.getElementById("chkInteractiveJob").checked = true;
-            document.getElementById("chkLogDir").checked = false;
-            ShowHideDiv(document.getElementById("chkInteractiveJob"), 'interactiveportfield')
-            ShowHideDiv(document.getElementById("chkLogDir"), 'logdirfield')
-
-            document.getElementById("interactivePort").value = "8889";
             document.getElementById("logdir").value = "";
             document.getElementById("runningasroot").checked = true;
 
@@ -496,11 +390,6 @@
                             <option value="tensorflowsshx">Tensorflow-SSH-Xserver</option>
                             <option value="pytorchssh">pytorch-SSH</option>
                             <option value="pytorchsshx">pytorch-SSH-Xserver</option>
-                            <option value="caffe">Caffe-IPython</option>
-                            <option value="caffessh">Caffe-SSH</option>
-                            <option value="caffesample">Caffe training example</option>
-                            <option value="tensorflowsample">Tensorflow training example</option>
-                            <option value="cntkipython">CNTK-IPython</option>
 
                         </select>
 
@@ -527,11 +416,8 @@
                     </label>
                     <input list="imagelist" class="form-control" name="image" id="image" />
                     <datalist id="imagelist">
-                        <option value="mlcloudreg.westus.cloudapp.azure.com:5000/philly/agi-tf-0.12.1-src-ubuntu-16.04:latest" />
-                        <option value="mlcloudreg.westus.cloudapp.azure.com:5000/philly/agi-tf-1.1.0-src-ubuntu-16.04:latest" />
-                        <option value="mlcloudreg.westus.cloudapp.azure.com:5000/philly/agi-pytorch-beta-0512017:latest" />
+                        <option value="mlcloudreg.westus.cloudapp.azure.com:5000/philly/agi-default-tf1.9.0-py36-gpu:latest" />
                         <option value="mlcloudreg.westus.cloudapp.azure.com:5000/philly/custom-tf-r1-2-ubuntu-16-04-cuda8:latest" />
-                        <option value="mlcloudreg.westus.cloudapp.azure.com:5000/philly/agi_compliance_tensorflow1.2.1_py35:latest" />
                         <option value="mlcloudreg.westus.cloudapp.azure.com:5000/philly/pytorch04" />
                     </datalist>
                 </div>
