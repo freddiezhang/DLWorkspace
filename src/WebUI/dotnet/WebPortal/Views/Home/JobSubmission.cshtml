@@ -328,7 +328,7 @@
             document.getElementById("datapath").value = "imagenet";
             document.getElementById("jobpath").value = "";
 
-            document.getElementById("image").value = "mlcloudreg.westus.cloudapp.azure.com:5000/philly/pytouch04";
+            document.getElementById("image").value = "mlcloudreg.westus.cloudapp.azure.com:5000/philly/pytorch04";
             document.getElementById("cmd").value = "apt-get update && apt-get install -y openssh-server sudo locales && locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8 && addgroup --force-badname --gid  @ViewData["gid"] domainusers && adduser --force-badname --home /home/@ViewData["Username"] --shell /bin/bash --uid @ViewData["uid"]  -gecos '' @ViewData["Username"] --disabled-password --gid @ViewData["gid"] && adduser @ViewData["Username"] sudo && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && mkdir -p /root/.ssh && cat /work/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys && mkdir -p /home/@ViewData["Username"]/.ssh && cat /work/.ssh/id_rsa.pub >> /home/@ViewData["Username"]/.ssh/authorized_keys && chown -R @ViewData["Username"] /home/@ViewData["Username"]/.ssh/ && service ssh restart && env | while read line; do if [[ $line != HOME=* ]] && [[ $line != INTERACTIVE* ]] ; then echo \"export $line\" >> /home/@ViewData["Username"]/.bashrc; fi; done && echo \"export PATH=/usr/local/anaconda3/bin:/usr/local/nvidia/bin:$PATH\" >> /home/@ViewData["Username"]/.bashrc && echo \"export LD_LIBRARY_PATH=/usr/local/nvidia/lib64:/usr/local/cuda/lib64:$LD_LIBRARY_PATH\" >> /home/@ViewData["Username"]/.bashrc && echo \"export PATH=/usr/local/anaconda3/bin:/usr/local/nvidia/bin:$PATH\" >> /root/.bashrc && echo \"export LD_LIBRARY_PATH=/usr/local/nvidia/lib64:/usr/local/cuda/lib64:$LD_LIBRARY_PATH\" >> /root/.bashrc  && sleep infinity";
             document.getElementById("chkInteractiveJob").checked = true;
             document.getElementById("chkLogDir").checked = false;
@@ -347,7 +347,7 @@
             document.getElementById("datapath").value = "imagenet";
             document.getElementById("jobpath").value = "";
 
-            document.getElementById("image").value = "mlcloudreg.westus.cloudapp.azure.com:5000/philly/pytouch04";
+            document.getElementById("image").value = "mlcloudreg.westus.cloudapp.azure.com:5000/philly/pytorch04";
             document.getElementById("cmd").value = "apt-get update && apt-get install -y openssh-server sudo locales && locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8 && addgroup --force-badname --gid  @ViewData["gid"] domainusers && adduser --force-badname --home /home/@ViewData["Username"] --shell /bin/bash --uid @ViewData["uid"]  -gecos '' @ViewData["Username"] --disabled-password --gid @ViewData["gid"] && adduser @ViewData["Username"] sudo && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && mkdir -p /root/.ssh && cat /work/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys && mkdir -p /home/@ViewData["Username"]/.ssh && cat /work/.ssh/id_rsa.pub >> /home/@ViewData["Username"]/.ssh/authorized_keys && chown -R @ViewData["Username"] /home/@ViewData["Username"]/.ssh/ && apt-get install debconf-utils && echo \"keyboard-configuration  keyboard-configuration/layout   select  English (US)\" | debconf-set-selections && echo \"keyboard-configuration  keyboard-configuration/variant  select  English (US)\" | debconf-set-selections && apt-get -y install xorg openbox && echo \"X11UseLocalhost no\" | tee -a /etc/ssh/sshd_config && service ssh restart && env | while read line; do if [[ $line != HOME=* ]] && [[ $line != INTERACTIVE* ]] ; then echo \"export $line\" >> /home/@ViewData["Username"]/.bashrc; fi; done && echo \"export PATH=/usr/local/anaconda3/bin:/usr/local/nvidia/bin:$PATH\" >> /home/@ViewData["Username"]/.bashrc && echo \"export LD_LIBRARY_PATH=/usr/local/nvidia/lib64:/usr/local/cuda/lib64:$LD_LIBRARY_PATH\" >> /home/@ViewData["Username"]/.bashrc && echo \"export PATH=/usr/local/anaconda3/bin:/usr/local/nvidia/bin:$PATH\" >> /root/.bashrc && echo \"export LD_LIBRARY_PATH=/usr/local/nvidia/lib64:/usr/local/cuda/lib64:$LD_LIBRARY_PATH\" >> /root/.bashrc  && sleep infinity";
             document.getElementById("chkInteractiveJob").checked = true;
             document.getElementById("chkLogDir").checked = false;
@@ -417,7 +417,6 @@
                     <input list="imagelist" class="form-control" name="image" id="image" />
                     <datalist id="imagelist">
                         <option value="mlcloudreg.westus.cloudapp.azure.com:5000/philly/agi-default-tf1.9.0-py36-gpu:latest" />
-                        <option value="mlcloudreg.westus.cloudapp.azure.com:5000/philly/agi-tf-1.1.0-src-ubuntu-16.04:latest" />
                         <option value="mlcloudreg.westus.cloudapp.azure.com:5000/philly/custom-tf-r1-2-ubuntu-16-04-cuda8:latest" />
                         <option value="mlcloudreg.westus.cloudapp.azure.com:5000/philly/pytorch04" />
                     </datalist>
