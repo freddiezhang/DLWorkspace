@@ -12,6 +12,8 @@ spec:
     FragmentGPUJob: active
   {% endif %}
   dnsPolicy: Default
+  imagePullSecrets:
+  - name: regcred
   containers:
   - name: {{ job["jobId"] }}
     image: {{ job["image"] }}
